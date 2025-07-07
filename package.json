@@ -1,24 +1,69 @@
 {
   "name": "lockify",
   "version": "1.0.0",
-  "description": "",
-  "main": "index.js",
+  "description": "A lightweight, framework-agnostic authentication package for Node.js with bcrypt and JWT helpers",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
   "scripts": {
     "build": "tsc",
     "start": "node dist/index.js",
     "dev": "ts-node-dev --respawn src/index.ts",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "jest",
+    "test:watch": "jest --watch",
+    "test:coverage": "jest --coverage",
+    "prepublishOnly": "npm run build",
+    "lint": "eslint src/**/*.ts",
+    "format": "prettier --write src/**/*.ts"
   },
-  "keywords": [],
-  "author": "",
-  "license": "ISC",
+  "keywords": [
+    "authentication",
+    "auth",
+    "jwt",
+    "bcrypt",
+    "password",
+    "token",
+    "middleware",
+    "express",
+    "koa",
+    "fastify",
+    "security",
+    "nodejs",
+    "typescript"
+  ],
+  "author": "Your Name <your.email@example.com>",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/yourusername/lockify.git"
+  },
+  "homepage": "https://github.com/yourusername/lockify#readme",
+  "bugs": {
+    "url": "https://github.com/yourusername/lockify/issues"
+  },
+  "files": [
+    "dist",
+    "README.md",
+    "LICENSE"
+  ],
+  "engines": {
+    "node": ">=16.0.0"
+  },
   "type": "commonjs",
   "dependencies": {
-    "dotenv": "^17.0.1",
-    "express": "^5.1.0"
+    "bcrypt": "^5.1.1",
+    "jsonwebtoken": "^9.0.2"
   },
   "devDependencies": {
+    "@types/bcrypt": "^5.0.2",
+    "@types/jest": "^29.5.12",
+    "@types/jsonwebtoken": "^9.0.6",
     "@types/node": "^24.0.10",
+    "@typescript-eslint/eslint-plugin": "^7.0.0",
+    "@typescript-eslint/parser": "^7.0.0",
+    "eslint": "^8.57.0",
+    "jest": "^29.7.0",
+    "prettier": "^3.2.5",
+    "ts-jest": "^29.1.2",
     "ts-node": "^10.9.2",
     "ts-node-dev": "^2.0.0",
     "typescript": "^5.8.3"
