@@ -1,0 +1,84 @@
+import jwt from 'jsonwebtoken';
+import { JwtPayload, JwtOptions } from '../types';
+import { 
+  TokenError, 
+  InvalidTokenError, 
+  ExpiredTokenError, 
+  MalformedTokenError 
+} from '../errors';
+
+/**
+ * Generate a JWT token with the given payload and secret
+ * @param payload - The payload to encode in the token
+ * @param secret - The secret key for signing the token
+ * @param options - Optional JWT options
+ * @returns The generated JWT token string
+ */
+export function generateToken<T extends JwtPayload = JwtPayload>(
+  payload: T, 
+  secret: string, 
+  options?: JwtOptions
+): string {
+  // TODO: Implement JWT token generation logic
+  throw new Error('generateToken not implemented');
+}
+
+/**
+ * Verify and decode a JWT token
+ * @param token - The JWT token to verify
+ * @param secret - The secret key for verification
+ * @returns The decoded payload or null if invalid
+ */
+export function verifyToken<T extends JwtPayload = JwtPayload>(
+  token: string, 
+  secret: string
+): T | null {
+  // TODO: Implement JWT token verification logic
+  throw new Error('verifyToken not implemented');
+}
+
+/**
+ * Decode a JWT token without verification (unsafe)
+ * @param token - The JWT token to decode
+ * @returns The decoded payload or null if malformed
+ */
+export function decodeToken<T extends JwtPayload = JwtPayload>(token: string): T | null {
+  // TODO: Implement JWT token decoding logic
+  throw new Error('decodeToken not implemented');
+}
+
+/**
+ * Check if a token is expired
+ * @param token - The JWT token to check
+ * @returns True if token is expired
+ */
+export function isTokenExpired(token: string): boolean {
+  // TODO: Implement token expiration check logic
+  throw new Error('isTokenExpired not implemented');
+}
+
+/**
+ * Get token expiration date
+ * @param token - The JWT token
+ * @returns The expiration date or null if no expiration
+ */
+export function getTokenExpiration(token: string): Date | null {
+  // TODO: Implement token expiration extraction logic
+  throw new Error('getTokenExpiration not implemented');
+}
+
+/**
+ * Refresh a token (generate new token with updated expiration)
+ * @param token - The existing token
+ * @param secret - The secret key
+ * @param options - Optional new options
+ * @returns New token with refreshed expiration
+ */
+export function refreshToken<T extends JwtPayload = JwtPayload>(
+  token: string,
+  secret: string,
+  options?: JwtOptions
+): string {
+  // TODO: Implement token refresh logic
+  throw new Error('refreshToken not implemented');
+}
