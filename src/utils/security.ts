@@ -6,8 +6,8 @@ import crypto from 'crypto';
  * @returns Random string
  */
 export function generateSecureRandom(length: number = 32): string {
-  // TODO: Implement secure random generation logic
-  throw new Error('generateSecureRandom not implemented');
+  const randomBytes = crypto.randomBytes(length);
+  return randomBytes.toString('hex').slice(0, length);
 }
 
 /**
@@ -16,8 +16,7 @@ export function generateSecureRandom(length: number = 32): string {
  * @returns Secure JWT secret
  */
 export function generateJwtSecret(length: number = 64): string {
-  // TODO: Implement JWT secret generation logic
-  throw new Error('generateJwtSecret not implemented');
+  return generateSecureRandom(length);
 }
 
 /**
@@ -26,8 +25,7 @@ export function generateJwtSecret(length: number = 64): string {
  * @returns Hashed data
  */
 export function hashSha256(data: string): string {
-  // TODO: Implement SHA-256 hashing logic
-  throw new Error('hashSha256 not implemented');
+  return crypto.createHash('sha256').update(data).digest('hex');
 }
 
 /**
@@ -42,8 +40,7 @@ export function generateHmac(
   secret: string, 
   algorithm: string = 'sha256'
 ): string {
-  // TODO: Implement HMAC generation logic
-  throw new Error('generateHmac not implemented');
+  return crypto.createHmac(algorithm, secret).update(data).digest('hex');
 }
 
 /**
@@ -60,8 +57,8 @@ export function verifyHmac(
   secret: string, 
   algorithm: string = 'sha256'
 ): boolean {
-  // TODO: Implement HMAC verification logic
-  throw new Error('verifyHmac not implemented');
+  const expectedSignature = generateHmac(data, secret, algorithm);
+  return constantTimeCompare(expectedSignature, signature);
 }
 
 /**
@@ -71,8 +68,12 @@ export function verifyHmac(
  * @returns True if strings are equal
  */
 export function constantTimeCompare(a: string, b: string): boolean {
-  // TODO: Implement constant-time comparison logic
-  throw new Error('constantTimeCompare not implemented');
+  if (a.length !== b.length) return false;
+
+  const bufferA = Buffer.from(a, 'utf-8')
+  const bufferB = Buffer.from(b, 'utf-8')
+
+  return crypto.timingSafeEqual(bufferA, bufferB);
 }
 
 /**
@@ -80,6 +81,5 @@ export function constantTimeCompare(a: string, b: string): boolean {
  * @returns UUID string
  */
 export function generateUuid(): string {
-  // TODO: Implement UUID generation logic
-  throw new Error('generateUuid not implemented');
+  return crypto.randomUUID()
 }
