@@ -20,11 +20,7 @@ A lightweight, framework-agnostic authentication package for Node.js with bcrypt
 ## Installation
 
 ```bash
-npm install lockify
-# or
-yarn add lockify
-# or
-pnpm add lockify
+npm install @soldead/lockify
 ```
 
 ## Quick Start
