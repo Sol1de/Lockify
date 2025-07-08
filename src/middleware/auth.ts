@@ -1,13 +1,16 @@
-import { GetUserById, MiddlewareFunction, AuthenticatedRequest, AuthenticatedResponse } from '../types';
-import { verifyToken } from '../helpers/token';
-import { extractTokenFromHeader } from '../utils/headers';
 import {
-  MissingTokenError,
-  InvalidTokenError,
   ExpiredTokenError,
+  InvalidTokenError,
   UserNotFoundError,
-  TokenError,
 } from '../errors';
+import { extractTokenFromHeader } from '../utils/headers';
+import { verifyToken } from '../helpers/token';
+import {
+  AuthenticatedRequest,
+  AuthenticatedResponse,
+  GetUserById,
+  MiddlewareFunction,
+} from '../types';
 
 /**
  * Create an authentication middleware function
@@ -19,45 +22,52 @@ export function requireAuth(
   getUserById: GetUserById,
   secret: string
 ): MiddlewareFunction {
-  return async (req: Record<string, unknown>, res: Record<string, unknown>, next: (err?: Error) => void) => {
+  return async (
+    req: Record<string, unknown>,
+    res: Record<string, unknown>,
+    next: (err?: Error) => void
+  ) => {
     try {
       // Extract token from Authorization header
-      const authHeader = (req as any).headers?.authorization;
+      const authReq = req as AuthenticatedRequest;
+      const authRes = res as AuthenticatedResponse;
+      const authHeader = authReq.headers?.authorization;
       const token = extractTokenFromHeader(authHeader);
-      
+
       if (!token) {
-        (res as any).status(401).json({ error: 'Token is missing' });
+        authRes.status(401).json({ error: 'Token is missing' });
         return;
       }
-      
+
       // Verify token
       const decoded = verifyToken(token, secret);
-      
+
       // Get user by ID from token
       const userId = decoded.userId || decoded.sub;
       if (!userId) {
-        (res as any).status(401).json({ error: 'Invalid token payload' });
+        authRes.status(401).json({ error: 'Invalid token payload' });
         return;
       }
-      
+
       const user = await getUserById(String(userId));
       if (!user) {
-        (res as any).status(404).json({ error: 'User not found' });
+        authRes.status(404).json({ error: 'User not found' });
         return;
       }
-      
+
       // Attach user to request
-      (req as any).user = user;
+      authReq.user = user;
       next();
     } catch (error) {
+      const authRes = res as AuthenticatedResponse;
       if (error instanceof InvalidTokenError) {
-        (res as any).status(401).json({ error: 'Invalid token' });
+        authRes.status(401).json({ error: 'Invalid token' });
       } else if (error instanceof ExpiredTokenError) {
-        (res as any).status(401).json({ error: 'Token has expired' });
+        authRes.status(401).json({ error: 'Token has expired' });
       } else if (error instanceof UserNotFoundError) {
-        (res as any).status(404).json({ error: 'User not found' });
+        authRes.status(404).json({ error: 'User not found' });
       } else {
-        (res as any).status(401).json({ error: 'Authentication failed' });
+        authRes.status(401).json({ error: 'Authentication failed' });
       }
     }
   };
@@ -73,35 +83,40 @@ export function optionalAuth(
   getUserById: GetUserById,
   secret: string
 ): MiddlewareFunction {
-  return async (req: Record<string, unknown>, res: Record<string, unknown>, next: (err?: Error) => void) => {
+  return async (
+    req: Record<string, unknown>,
+    res: Record<string, unknown>,
+    next: (err?: Error) => void
+  ) => {
     try {
       // Extract token from Authorization header
-      const authHeader = (req as any).headers?.authorization;
+      const authReq = req as AuthenticatedRequest;
+      const authHeader = authReq.headers?.authorization;
       const token = extractTokenFromHeader(authHeader);
-      
+
       if (!token) {
         // No token provided, continue without authentication
         next();
         return;
       }
-      
+
       try {
         // Verify token
         const decoded = verifyToken(token, secret);
-        
+
         // Get user by ID from token
         const userId = decoded.userId || decoded.sub;
         if (userId) {
           const user = await getUserById(String(userId));
           if (user) {
-            (req as any).user = user;
+            authReq.user = user;
           }
         }
       } catch (error) {
         // Token verification failed, but this is optional auth so we continue
         // without setting req.user
       }
-      
+
       next();
     } catch (error) {
       // For optional auth, we don't fail on errors
@@ -122,53 +137,61 @@ export function requireRole(
   secret: string,
   allowedRoles: string[]
 ): MiddlewareFunction {
-  return async (req: Record<string, unknown>, res: Record<string, unknown>, next: (err?: Error) => void) => {
+  return async (
+    req: Record<string, unknown>,
+    res: Record<string, unknown>,
+    next: (err?: Error) => void
+  ) => {
     try {
       // First authenticate the user
-      const authHeader = (req as any).headers?.authorization;
+      const authReq = req as AuthenticatedRequest;
+      const authHeader = authReq.headers?.authorization;
       const token = extractTokenFromHeader(authHeader);
-      
+
+      const authRes = res as AuthenticatedResponse;
+
       if (!token) {
-        (res as any).status(401).json({ error: 'Token is missing' });
+        authRes.status(401).json({ error: 'Token is missing' });
         return;
       }
-      
+
       // Verify token
       const decoded = verifyToken(token, secret);
-      
+
       // Get user by ID from token
       const userId = decoded.userId || decoded.sub;
       if (!userId) {
-        (res as any).status(401).json({ error: 'Invalid token payload' });
+        authRes.status(401).json({ error: 'Invalid token payload' });
         return;
       }
-      
+
       const user = await getUserById(String(userId));
       if (!user) {
-        (res as any).status(404).json({ error: 'User not found' });
+        authRes.status(404).json({ error: 'User not found' });
         return;
       }
-      
+
       // Check role from token payload or user object
-      const userRole = decoded.role || (user as any).role;
-      
+      const userRole = decoded.role || (user as { role?: string }).role;
+
       if (!userRole || !allowedRoles.includes(String(userRole))) {
-        (res as any).status(403).json({ error: 'Insufficient permissions' });
+        authRes.status(403).json({ error: 'Insufficient permissions' });
         return;
       }
-      
+
       // Attach user to request
-      (req as any).user = user;
+      authReq.user = user;
       next();
     } catch (error) {
+      const authRes = res as AuthenticatedResponse;
       if (error instanceof InvalidTokenError) {
-        (res as any).status(401).json({ error: 'Invalid token' });
+        authRes.status(401).json({ error: 'Invalid token' });
       } else if (error instanceof ExpiredTokenError) {
-        (res as any).status(401).json({ error: 'Token has expired' });
+        authRes.status(401).json({ error: 'Token has expired' });
       } else if (error instanceof UserNotFoundError) {
-        (res as any).status(404).json({ error: 'User not found' });
+        authRes.status(404).json({ error: 'User not found' });
       } else {
-        (res as any).status(401).json({ error: 'Authentication failed' });
+        authRes.status(401).json({ error: 'Authentication failed' });
       }
     }
   };

@@ -20,7 +20,20 @@ export interface JwtOptions {
   issuer?: string;
   audience?: string | string[];
   subject?: string;
-  algorithm?: 'HS256' | 'HS384' | 'HS512' | 'RS256' | 'RS384' | 'RS512' | 'PS256' | 'PS384' | 'PS512' | 'ES256' | 'ES384' | 'ES512' | 'none';
+  algorithm?:
+    | 'HS256'
+    | 'HS384'
+    | 'HS512'
+    | 'RS256'
+    | 'RS384'
+    | 'RS512'
+    | 'PS256'
+    | 'PS384'
+    | 'PS512'
+    | 'ES256'
+    | 'ES384'
+    | 'ES512'
+    | 'none';
   keyid?: string;
   noTimestamp?: boolean;
   header?: { [key: string]: unknown };
@@ -37,7 +50,9 @@ export interface HashOptions {
 /**
  * User lookup function type
  */
-export type GetUserById = (id: string) => Promise<Record<string, unknown> | null>;
+export type GetUserById = (
+  id: string
+) => Promise<Record<string, unknown> | null>;
 
 /**
  * Middleware function type compatible with Express/Koa/Fastify
@@ -53,6 +68,10 @@ export type MiddlewareFunction = (
  */
 export interface AuthenticatedRequest {
   user?: Record<string, unknown>;
+  headers?: {
+    authorization?: string;
+    [key: string]: string | undefined;
+  };
   [key: string]: unknown;
 }
 

@@ -25,13 +25,13 @@ export function generateToken<T extends JwtPayload = JwtPayload>(
     if (!secret) {
       throw new TokenError('Secret is required for token generation');
     }
-    
+
     if (!payload || typeof payload !== 'object') {
       throw new TokenError('Payload must be an object');
     }
-    
+
     const jwtOptions: jwt.SignOptions = {};
-    
+
     if (options?.expiresIn !== undefined) {
       jwtOptions.expiresIn = options.expiresIn;
     }
@@ -62,7 +62,7 @@ export function generateToken<T extends JwtPayload = JwtPayload>(
     if (options?.encoding) {
       jwtOptions.encoding = options.encoding;
     }
-    
+
     return jwt.sign(payload, secret, jwtOptions);
   } catch (error) {
     if (error instanceof TokenError) {
@@ -113,13 +113,13 @@ export function decodeToken<T extends JwtPayload = JwtPayload>(
     if (!token || typeof token !== 'string') {
       return null;
     }
-    
+
     const decoded = jwt.decode(token, { complete: false });
-    
+
     if (decoded && typeof decoded === 'object') {
       return decoded as T;
     }
-    
+
     return null;
   } catch (error) {
     return null;
@@ -137,7 +137,7 @@ export function isTokenExpired(token: string): boolean {
     if (!decoded || !decoded.exp) {
       return false; // No expiration set
     }
-    
+
     const currentTime = Math.floor(Date.now() / 1000);
     return decoded.exp < currentTime;
   } catch (error) {
@@ -156,7 +156,7 @@ export function getTokenExpiration(token: string): Date | null {
     if (!decoded || !decoded.exp) {
       return null;
     }
-    
+
     // JWT exp is in seconds, Date constructor expects milliseconds
     return new Date(decoded.exp * 1000);
   } catch (error) {
@@ -179,16 +179,17 @@ export function refreshToken(
   try {
     // First verify the token to ensure it's valid
     const decoded = verifyToken(token, secret);
-    
+
     // Remove timing-sensitive claims that shouldn't be copied
-    const { iat, exp, ...payload } = decoded;
-    
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    const { iat: _iat, exp: _exp, ...payload } = decoded;
+
     // Generate new token with refreshed expiration
     const refreshOptions: JwtOptions = {
       expiresIn: '1h', // Default refresh expiration
       ...options,
     };
-    
+
     return generateToken(payload, secret, refreshOptions);
   } catch (error) {
     if (error instanceof TokenError) {
@@ -224,11 +225,11 @@ export function validateSecret(secret: string): boolean {
 export function getTokenHeader(token: string): Record<string, unknown> | null {
   try {
     const decoded = jwt.decode(token, { complete: true });
-    
+
     if (decoded && typeof decoded === 'object' && decoded.header) {
       return decoded.header as unknown as Record<string, unknown>;
     }
-    
+
     return null;
   } catch (error) {
     return null;
@@ -241,17 +242,20 @@ export function getTokenHeader(token: string): Record<string, unknown> | null {
  * @param minutesBeforeExpiry - Minutes before expiry to consider for refresh (default: 15)
  * @returns True if token should be refreshed
  */
-export function shouldRefreshToken(token: string, minutesBeforeExpiry = 15): boolean {
+export function shouldRefreshToken(
+  token: string,
+  minutesBeforeExpiry = 15
+): boolean {
   try {
     const decoded = decodeToken(token);
     if (!decoded || !decoded.exp) {
       return false; // No expiration set
     }
-    
+
     const currentTime = Math.floor(Date.now() / 1000);
     const timeUntilExpiry = decoded.exp - currentTime;
     const minutesUntilExpiry = timeUntilExpiry / 60;
-    
+
     return minutesUntilExpiry <= minutesBeforeExpiry && minutesUntilExpiry > 0;
   } catch (error) {
     return true; // If we can't decode, suggest refresh
@@ -269,10 +273,10 @@ export function getTokenTimeRemaining(token: string): number | null {
     if (!decoded || !decoded.exp) {
       return null;
     }
-    
+
     const currentTime = Math.floor(Date.now() / 1000);
     const timeRemaining = decoded.exp - currentTime;
-    
+
     return Math.max(0, timeRemaining);
   } catch (error) {
     return null;

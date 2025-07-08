@@ -1,5 +1,3 @@
-import { MalformedTokenError, MissingTokenError } from '../errors';
-
 /**
  * Extract token from Authorization header
  * @param authHeader - The Authorization header value
@@ -11,19 +9,19 @@ export function extractTokenFromHeader(
   if (!authHeader) {
     return null;
   }
-  
+
   // Try Bearer token first
   const bearerToken = extractBearerToken(authHeader);
   if (bearerToken) {
     return bearerToken;
   }
-  
+
   // Try other common schemes
   const basicToken = extractTokenByScheme(authHeader, 'Basic');
   if (basicToken) {
     return basicToken;
   }
-  
+
   return null;
 }
 
@@ -38,20 +36,20 @@ export function extractBearerToken(
   if (!authHeader || typeof authHeader !== 'string') {
     return null;
   }
-  
+
   const trimmed = authHeader.trim();
   const bearerPrefix = 'bearer ';
-  
+
   if (!trimmed.toLowerCase().startsWith(bearerPrefix)) {
     return null;
   }
-  
+
   const token = trimmed.substring(bearerPrefix.length).trim();
-  
+
   if (!token) {
     return null;
   }
-  
+
   return token;
 }
 
@@ -64,12 +62,23 @@ export function validateAuthHeader(authHeader: string | undefined): boolean {
   if (!authHeader || typeof authHeader !== 'string') {
     return false;
   }
-  
+
   const trimmed = authHeader.trim().toLowerCase();
-  
+
   // Check for common authorization schemes (case-insensitive)
-  const commonSchemes = ['bearer', 'basic', 'digest', 'hoba', 'mutual', 'negotiate', 'ntlm', 'scram-sha-1', 'scram-sha-256', 'token'];
-  
+  const commonSchemes = [
+    'bearer',
+    'basic',
+    'digest',
+    'hoba',
+    'mutual',
+    'negotiate',
+    'ntlm',
+    'scram-sha-1',
+    'scram-sha-256',
+    'token',
+  ];
+
   const hasValidScheme = commonSchemes.some(scheme => {
     const schemePrefix = `${scheme} `;
     if (trimmed.startsWith(schemePrefix)) {
@@ -78,7 +87,7 @@ export function validateAuthHeader(authHeader: string | undefined): boolean {
     }
     return false;
   });
-  
+
   return hasValidScheme;
 }
 
@@ -95,20 +104,20 @@ export function extractTokenByScheme(
   if (!authHeader || typeof authHeader !== 'string') {
     return null;
   }
-  
+
   const trimmed = authHeader.trim();
   const schemePrefix = `${scheme.toLowerCase()} `;
-  
+
   if (!trimmed.toLowerCase().startsWith(schemePrefix)) {
     return null;
   }
-  
+
   const token = trimmed.substring(scheme.length + 1).trim();
-  
+
   if (!token) {
     return null;
   }
-  
+
   return token;
 }
 
@@ -125,13 +134,13 @@ export function extractTokenFromCookie(
   if (!cookieHeader || typeof cookieHeader !== 'string') {
     return null;
   }
-  
+
   // Parse cookies from the header
   const cookies = cookieHeader.split(';').map(cookie => cookie.trim());
-  
+
   for (const cookie of cookies) {
     const [name, value] = cookie.split('=').map(part => part.trim());
-    
+
     if (name === cookieName && value) {
       // Decode URI component in case the token was encoded
       try {
@@ -142,6 +151,6 @@ export function extractTokenFromCookie(
       }
     }
   }
-  
+
   return null;
 }

@@ -5,11 +5,7 @@ export class AuthError extends Error {
   public readonly code: string;
   public readonly statusCode: number;
 
-  constructor(
-    message: string,
-    code = 'AUTH_ERROR',
-    statusCode = 401
-  ) {
+  constructor(message: string, code = 'AUTH_ERROR', statusCode = 401) {
     super(message);
     this.name = 'AuthError';
     this.code = code;
@@ -90,9 +86,7 @@ export class InvalidPasswordError extends AuthError {
 }
 
 export class WeakPasswordError extends HashError {
-  constructor(
-    message = 'Password does not meet security requirements'
-  ) {
+  constructor(message = 'Password does not meet security requirements') {
     super(message, 'WEAK_PASSWORD');
     this.name = 'WeakPasswordError';
   }

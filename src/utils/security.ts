@@ -24,17 +24,17 @@ export function generateJwtSecret(length = 64): string {
   if (length < 32) {
     throw new Error('JWT secret must be at least 32 characters long');
   }
-  
+
   // Use printable ASCII characters (33-126) excluding problematic ones
   // ASCII 33-126 includes: !"#$%&'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\]^_`abcdefghijklmnopqrstuvwxyz{|}~
   const minChar = 33; // '!' character
   const maxChar = 126; // '~' character
-  
+
   // Characters to avoid (quotes and backslashes that might cause issues in JSON/strings)
   const avoidChars = new Set(['"', "'", '\\', '`']);
-  
+
   let secret = '';
-  
+
   for (let i = 0; i < length; i++) {
     let char;
     do {
@@ -47,10 +47,10 @@ export function generateJwtSecret(length = 64): string {
       const charCode = minChar + (randomByte % (maxChar - minChar + 1));
       char = String.fromCharCode(charCode);
     } while (avoidChars.has(char)); // Regenerate if we hit a problematic character
-    
+
     secret += char;
   }
-  
+
   return secret;
 }
 
@@ -77,7 +77,9 @@ export function generateHmac(
   try {
     return crypto.createHmac(algorithm, secret).update(data).digest('hex');
   } catch (error: unknown) {
-    throw new Error(`HMAC generation failed: ${error instanceof Error ? error.message : 'Unknown error'}`);
+    throw new Error(
+      `HMAC generation failed: ${error instanceof Error ? error.message : 'Unknown error'}`
+    );
   }
 }
 
