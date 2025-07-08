@@ -1,10 +1,10 @@
 import jwt from 'jsonwebtoken';
 import { JwtPayload, JwtOptions } from '../types';
-import { 
-  TokenError, 
-  InvalidTokenError, 
-  ExpiredTokenError, 
-  MalformedTokenError 
+import {
+  TokenError,
+  InvalidTokenError,
+  ExpiredTokenError,
+  MalformedTokenError,
 } from '../errors';
 
 /**
@@ -15,8 +15,8 @@ import {
  * @returns The generated JWT token string
  */
 export function generateToken<T extends JwtPayload = JwtPayload>(
-  payload: T, 
-  secret: string, 
+  payload: T,
+  secret: string,
   options?: JwtOptions
 ): string {
   // TODO: Implement JWT token generation logic
@@ -55,7 +55,9 @@ export function verifyToken<T extends JwtPayload = JwtPayload>(
  * @param token - The JWT token to decode
  * @returns The decoded payload or null if malformed
  */
-export function decodeToken<T extends JwtPayload = JwtPayload>(token: string): T | null {
+export function decodeToken<T extends JwtPayload = JwtPayload>(
+  token: string
+): T | null {
   // TODO: Implement JWT token decoding logic
   throw new Error('decodeToken not implemented');
 }

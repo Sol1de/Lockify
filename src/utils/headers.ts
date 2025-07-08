@@ -5,7 +5,9 @@ import { MissingTokenError, MalformedTokenError } from '../errors';
  * @param authHeader - The Authorization header value
  * @returns The extracted token or null if not found
  */
-export function extractTokenFromHeader(authHeader: string | undefined): string | null {
+export function extractTokenFromHeader(
+  authHeader: string | undefined
+): string | null {
   // TODO: Implement token extraction logic
   throw new Error('extractTokenFromHeader not implemented');
 }
@@ -15,7 +17,9 @@ export function extractTokenFromHeader(authHeader: string | undefined): string |
  * @param authHeader - The Authorization header value
  * @returns The bearer token or null if not found
  */
-export function extractBearerToken(authHeader: string | undefined): string | null {
+export function extractBearerToken(
+  authHeader: string | undefined
+): string | null {
   // TODO: Implement bearer token extraction logic
   throw new Error('extractBearerToken not implemented');
 }
@@ -37,7 +41,7 @@ export function validateAuthHeader(authHeader: string | undefined): boolean {
  * @returns The extracted token or null if not found
  */
 export function extractTokenByScheme(
-  authHeader: string | undefined, 
+  authHeader: string | undefined,
   scheme: string = 'Bearer'
 ): string | null {
   // TODO: Implement token extraction by scheme logic
@@ -51,7 +55,7 @@ export function extractTokenByScheme(
  * @returns The extracted token or null if not found
  */
 export function extractTokenFromCookie(
-  cookieHeader: string | undefined, 
+  cookieHeader: string | undefined,
   cookieName: string = 'token'
 ): string | null {
   // TODO: Implement cookie token extraction logic

@@ -40,7 +40,11 @@ export type GetUserById = (id: string) => Promise<any>;
 /**
  * Middleware function type compatible with Express/Koa/Fastify
  */
-export type MiddlewareFunction = (req: any, res: any, next: (err?: any) => void) => void | Promise<void>;
+export type MiddlewareFunction = (
+  req: any,
+  res: any,
+  next: (err?: any) => void
+) => void | Promise<void>;
 
 /**
  * Request object extended with user property
