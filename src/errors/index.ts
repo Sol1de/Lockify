@@ -76,7 +76,7 @@ export class UserNotFoundError extends AuthError {
 }
 
 /**
- * Password related errors
+ * Password-related errors
  */
 export class InvalidPasswordError extends AuthError {
   constructor(message: string = 'Invalid password') {
