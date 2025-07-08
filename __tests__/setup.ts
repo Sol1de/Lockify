@@ -10,7 +10,8 @@ process.env.JWT_SECRET = 'test-jwt-secret-key-for-testing-only';
 // import '@testing-library/jest-dom/extend-expect';
 
 // Global test utilities can be added here
-global.testUtils = {
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+(global as any).testUtils = {
   mockUser: {
     id: '123',
     email: 'test@example.com',

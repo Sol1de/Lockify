@@ -6,7 +6,12 @@ import crypto from 'crypto';
  * @returns Random string
  */
 export function generateSecureRandom(length: number = 32): string {
-  const randomBytes = crypto.randomBytes(length);
+  if (length <= 0 || !Number.isInteger(length)) {
+    throw new Error('Length must be a positive integer');
+  }
+  
+  const bytesNeeded = Math.ceil(length / 2);
+  const randomBytes = crypto.randomBytes(bytesNeeded);
   return randomBytes.toString('hex').slice(0, length);
 }
 
@@ -16,14 +21,12 @@ export function generateSecureRandom(length: number = 32): string {
  * @returns Secure JWT secret
  */
 export function generateJwtSecret(length: number = 64): string {
+  if (length < 32) {
+    throw new Error('JWT secret must be at least 32 characters long');
+  }
   return generateSecureRandom(length);
 }
 
-/**
- * Hash sensitive data with SHA-256
- * @param data - Data to hash
- * @returns Hashed data
- */
 export function hashSha256(data: string): string {
   return crypto.createHash('sha256').update(data).digest('hex');
 }
@@ -36,11 +39,18 @@ export function hashSha256(data: string): string {
  * @returns HMAC signature
  */
 export function generateHmac(
-  data: string, 
-  secret: string, 
+  data: string,
+  secret: string,
   algorithm: string = 'sha256'
 ): string {
-  return crypto.createHmac(algorithm, secret).update(data).digest('hex');
+  try {
+    if (!data || !secret) {
+      throw new Error('Data and secret are required');
+    }
+    return crypto.createHmac(algorithm, secret).update(data).digest('hex');
+  } catch (error: any) {
+    throw new Error(`HMAC generation failed: ${error.message}`);
+  }
 }
 
 /**
@@ -52,9 +62,9 @@ export function generateHmac(
  * @returns True if signature is valid
  */
 export function verifyHmac(
-  data: string, 
-  signature: string, 
-  secret: string, 
+  data: string,
+  signature: string,
+  secret: string,
   algorithm: string = 'sha256'
 ): boolean {
   const expectedSignature = generateHmac(data, secret, algorithm);
@@ -70,8 +80,8 @@ export function verifyHmac(
 export function constantTimeCompare(a: string, b: string): boolean {
   if (a.length !== b.length) return false;
 
-  const bufferA = Buffer.from(a, 'utf-8')
-  const bufferB = Buffer.from(b, 'utf-8')
+  const bufferA = Buffer.from(a, 'utf-8');
+  const bufferB = Buffer.from(b, 'utf-8');
 
   return crypto.timingSafeEqual(bufferA, bufferB);
 }
@@ -81,5 +91,5 @@ export function constantTimeCompare(a: string, b: string): boolean {
  * @returns UUID string
  */
 export function generateUuid(): string {
-  return crypto.randomUUID()
+  return crypto.randomUUID();
 }
