@@ -43,10 +43,11 @@ export function generateHmac(
   secret: string,
   algorithm: string = 'sha256'
 ): string {
+  if (!data || !secret) {
+    throw new Error('Data and secret are required');
+  }
+
   try {
-    if (!data || !secret) {
-      throw new Error('Data and secret are required');
-    }
     return crypto.createHmac(algorithm, secret).update(data).digest('hex');
   } catch (error: any) {
     throw new Error(`HMAC generation failed: ${error.message}`);

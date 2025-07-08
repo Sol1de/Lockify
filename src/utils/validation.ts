@@ -36,8 +36,33 @@ export function validatePasswordStrength(
   password: string, 
   options: PasswordValidationOptions = {}
 ): boolean {
-  // TODO: Implement password strength validation logic
-  throw new Error('validatePasswordStrength not implemented');
+  const settings = { ...DEFAULT_PASSWORD_OPTIONS, ...options };
+  
+  if (password.length < settings.minLength || password.length > settings.maxLength) {
+    throw new WeakPasswordError('Password does not meet length requirements.');
+  }
+
+  if (settings.requireUppercase && !/[A-Z]/.test(password)) {
+    throw new WeakPasswordError('Password must contain an uppercase letter.');
+  }
+  
+  if (settings.requireLowercase && !/[a-z]/.test(password)) {
+    throw new WeakPasswordError('Password must contain a lowercase letter.');
+  }
+  
+  if (settings.requireNumbers && !/[0-9]/.test(password)) {
+    throw new WeakPasswordError('Password must contain a number.');
+  }
+  
+  if (settings.requireSpecialChars && !/[!@#$%^&*(),.?":{}|<>]/.test(password)) {
+    throw new WeakPasswordError('Password must contain a special character.');
+  }
+  
+  if (isPasswordForbidden(password, settings.forbiddenPasswords)) {
+    throw new WeakPasswordError('Password is too common.');
+  }
+
+  return true; // Password is strong
 }
 
 /**
@@ -46,8 +71,13 @@ export function validatePasswordStrength(
  * @returns True if email format is valid
  */
 export function validateEmail(email: string): boolean {
-  // TODO: Implement email validation logic
-  throw new Error('validateEmail not implemented');
+  if (!email.trim()) {
+    return false;
+  }
+
+  const emailRegex = /^[a-zA-Z0-9.!#$%&'*+\/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*$/;
+  
+  return emailRegex.test(email.trim());
 }
 
 /**
@@ -56,8 +86,26 @@ export function validateEmail(email: string): boolean {
  * @returns True if secret meets security requirements
  */
 export function validateJwtSecret(secret: string): boolean {
-  // TODO: Implement JWT secret validation logic
-  throw new Error('validateJwtSecret not implemented');
+  if (!secret) {
+    return false;
+  }
+
+  // JWT secret should be at least 32 characters long for security
+  if (secret.length < 32) {
+    return false;
+  }
+
+  // Check entropy - should contain a mix of characters
+  const hasLowercase = /[a-z]/.test(secret);
+  const hasUppercase = /[A-Z]/.test(secret);
+  const hasNumbers = /[0-9]/.test(secret);
+  const hasSpecialChars = /[!@#$%^&*(),.?":{}|<>\-_=+]/.test(secret);
+
+  // At least 3 out of 4 character types should be present
+  const characterTypeCount = [hasLowercase, hasUppercase, hasNumbers, hasSpecialChars]
+    .filter(Boolean).length;
+
+  return characterTypeCount >= 3;
 }
 
 /**
@@ -66,8 +114,29 @@ export function validateJwtSecret(secret: string): boolean {
  * @returns Sanitized input string
  */
 export function sanitizeInput(input: string): string {
-  // TODO: Implement input sanitization logic
-  throw new Error('sanitizeInput not implemented');
+
+  return input
+    // Remove HTML tags
+    .replace(/<[^>]*>/g, '')
+    // Remove script tags and their content
+    .replace(/<script[^>]*>[\s\S]*?<\/script>/gi, '')
+    // Remove javascript: protocol
+    .replace(/javascript:/gi, '')
+    // Remove on* event handlers
+    .replace(/\son\w+\s*=/gi, '')
+    // Replace potentially dangerous characters
+    .replace(/[<>"'&]/g, (match) => {
+      const entities: { [key: string]: string } = {
+        '<': '&lt;',
+        '>': '&gt;',
+        '"': '&quot;',
+        "'": '&#x27;',
+        '&': '&amp;'
+      };
+      return entities[match] || match;
+    })
+    // Trim whitespace
+    .trim();
 }
 
 /**
@@ -77,6 +146,24 @@ export function sanitizeInput(input: string): string {
  * @returns True if password is forbidden
  */
 export function isPasswordForbidden(password: string, forbiddenList: string[]): boolean {
-  // TODO: Implement forbidden password check logic
-  throw new Error('isPasswordForbidden not implemented');
+  if (!password || !forbiddenList || !Array.isArray(forbiddenList)) {
+    return false;
+  }
+
+  const normalizedPassword = password.toLowerCase().trim();
+
+  // Check exact matches
+  if (forbiddenList.some(forbidden => forbidden.toLowerCase() === normalizedPassword)) {
+    return true;
+  }
+
+  // Check if password contains any forbidden password as a substantial part
+  return forbiddenList.some(forbidden => {
+    const normalizedForbidden = forbidden.toLowerCase().trim();
+    // Only consider forbidden passwords of 4+ characters to avoid false positives
+    return normalizedForbidden.length >= 4 &&
+           normalizedPassword.includes(normalizedForbidden) &&
+           // The forbidden word should make up at least 50% of the password
+           normalizedForbidden.length >= (normalizedPassword.length / 2);
+  });
 }
