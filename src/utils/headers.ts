@@ -1,4 +1,4 @@
-import { MissingTokenError, MalformedTokenError } from '../errors';
+// import { MalformedTokenError, MissingTokenError } from '../errors';
 
 /**
  * Extract token from Authorization header
@@ -6,10 +6,10 @@ import { MissingTokenError, MalformedTokenError } from '../errors';
  * @returns The extracted token or null if not found
  */
 export function extractTokenFromHeader(
-  authHeader: string | undefined
+  _authHeader: string | undefined
 ): string | null {
   // TODO: Implement token extraction logic
-  throw new Error('extractTokenFromHeader not implemented');
+  return null;
 }
 
 /**
@@ -18,10 +18,10 @@ export function extractTokenFromHeader(
  * @returns The bearer token or null if not found
  */
 export function extractBearerToken(
-  authHeader: string | undefined
+  _authHeader: string | undefined
 ): string | null {
   // TODO: Implement bearer token extraction logic
-  throw new Error('extractBearerToken not implemented');
+  return null;
 }
 
 /**
@@ -29,9 +29,9 @@ export function extractBearerToken(
  * @param authHeader - The Authorization header value
  * @returns True if header format is valid
  */
-export function validateAuthHeader(authHeader: string | undefined): boolean {
+export function validateAuthHeader(_authHeader: string | undefined): boolean {
   // TODO: Implement header validation logic
-  throw new Error('validateAuthHeader not implemented');
+  return false;
 }
 
 /**
@@ -41,11 +41,11 @@ export function validateAuthHeader(authHeader: string | undefined): boolean {
  * @returns The extracted token or null if not found
  */
 export function extractTokenByScheme(
-  authHeader: string | undefined,
-  scheme: string = 'Bearer'
+  _authHeader: string | undefined,
+  _scheme = 'Bearer'
 ): string | null {
   // TODO: Implement token extraction by scheme logic
-  throw new Error('extractTokenByScheme not implemented');
+  return null;
 }
 
 /**
@@ -55,9 +55,9 @@ export function extractTokenByScheme(
  * @returns The extracted token or null if not found
  */
 export function extractTokenFromCookie(
-  cookieHeader: string | undefined,
-  cookieName: string = 'token'
+  _cookieHeader: string | undefined,
+  _cookieName = 'token'
 ): string | null {
   // TODO: Implement cookie token extraction logic
-  throw new Error('extractTokenFromCookie not implemented');
+  return null;
 }

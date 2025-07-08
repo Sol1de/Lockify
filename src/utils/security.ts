@@ -5,7 +5,7 @@ import crypto from 'crypto';
  * @param length - Length of the random string
  * @returns Random string
  */
-export function generateSecureRandom(length: number = 32): string {
+export function generateSecureRandom(length = 32): string {
   if (length <= 0 || !Number.isInteger(length)) {
     throw new Error('Length must be a positive integer');
   }
@@ -20,7 +20,7 @@ export function generateSecureRandom(length: number = 32): string {
  * @param length - Length of the secret (default: 64)
  * @returns Secure JWT secret
  */
-export function generateJwtSecret(length: number = 64): string {
+export function generateJwtSecret(length = 64): string {
   if (length < 32) {
     throw new Error('JWT secret must be at least 32 characters long');
   }
@@ -41,7 +41,7 @@ export function hashSha256(data: string): string {
 export function generateHmac(
   data: string,
   secret: string,
-  algorithm: string = 'sha256'
+  algorithm = 'sha256'
 ): string {
   if (!data || !secret) {
     throw new Error('Data and secret are required');
@@ -49,8 +49,8 @@ export function generateHmac(
 
   try {
     return crypto.createHmac(algorithm, secret).update(data).digest('hex');
-  } catch (error: any) {
-    throw new Error(`HMAC generation failed: ${error.message}`);
+  } catch (error: unknown) {
+    throw new Error(`HMAC generation failed: ${error instanceof Error ? error.message : 'Unknown error'}`);
   }
 }
 
@@ -66,7 +66,7 @@ export function verifyHmac(
   data: string,
   signature: string,
   secret: string,
-  algorithm: string = 'sha256'
+  algorithm = 'sha256'
 ): boolean {
   const expectedSignature = generateHmac(data, secret, algorithm);
   return constantTimeCompare(expectedSignature, signature);

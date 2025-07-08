@@ -7,8 +7,8 @@ export class AuthError extends Error {
 
   constructor(
     message: string,
-    code: string = 'AUTH_ERROR',
-    statusCode: number = 401
+    code = 'AUTH_ERROR',
+    statusCode = 401
   ) {
     super(message);
     this.name = 'AuthError';
@@ -26,7 +26,7 @@ export class AuthError extends Error {
  * JWT token related errors
  */
 export class TokenError extends AuthError {
-  constructor(message: string, code: string = 'TOKEN_ERROR') {
+  constructor(message: string, code = 'TOKEN_ERROR') {
     super(message, code, 401);
     this.name = 'TokenError';
   }
@@ -36,7 +36,7 @@ export class TokenError extends AuthError {
  * Password hashing related errors
  */
 export class HashError extends AuthError {
-  constructor(message: string, code: string = 'HASH_ERROR') {
+  constructor(message: string, code = 'HASH_ERROR') {
     super(message, code, 500);
     this.name = 'HashError';
   }
@@ -46,25 +46,25 @@ export class HashError extends AuthError {
  * Specific token error types
  */
 export class InvalidTokenError extends TokenError {
-  constructor(message: string = 'Invalid token') {
+  constructor(message = 'Invalid token') {
     super(message, 'INVALID_TOKEN');
   }
 }
 
 export class ExpiredTokenError extends TokenError {
-  constructor(message: string = 'Token has expired') {
+  constructor(message = 'Token has expired') {
     super(message, 'EXPIRED_TOKEN');
   }
 }
 
 export class MissingTokenError extends TokenError {
-  constructor(message: string = 'Token is missing') {
+  constructor(message = 'Token is missing') {
     super(message, 'MISSING_TOKEN');
   }
 }
 
 export class MalformedTokenError extends TokenError {
-  constructor(message: string = 'Token is malformed') {
+  constructor(message = 'Token is malformed') {
     super(message, 'MALFORMED_TOKEN');
   }
 }
@@ -73,7 +73,7 @@ export class MalformedTokenError extends TokenError {
  * User lookup related errors
  */
 export class UserNotFoundError extends AuthError {
-  constructor(message: string = 'User not found') {
+  constructor(message = 'User not found') {
     super(message, 'USER_NOT_FOUND', 404);
     this.name = 'UserNotFoundError';
   }
@@ -83,7 +83,7 @@ export class UserNotFoundError extends AuthError {
  * Password-related errors
  */
 export class InvalidPasswordError extends AuthError {
-  constructor(message: string = 'Invalid password') {
+  constructor(message = 'Invalid password') {
     super(message, 'INVALID_PASSWORD', 401);
     this.name = 'InvalidPasswordError';
   }
@@ -91,7 +91,7 @@ export class InvalidPasswordError extends AuthError {
 
 export class WeakPasswordError extends HashError {
   constructor(
-    message: string = 'Password does not meet security requirements'
+    message = 'Password does not meet security requirements'
   ) {
     super(message, 'WEAK_PASSWORD');
     this.name = 'WeakPasswordError';
