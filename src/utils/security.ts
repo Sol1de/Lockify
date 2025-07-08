@@ -91,5 +91,5 @@ export function constantTimeCompare(a: string, b: string): boolean {
  * @returns UUID string
  */
 export function generateUuid(): string {
-  return crypto.randomUUID()
+  return crypto.randomUUID();
 }
