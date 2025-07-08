@@ -1,10 +1,10 @@
 import jwt from 'jsonwebtoken';
-import { JwtPayload, JwtOptions } from '../types';
+import { JwtOptions, JwtPayload } from '../types';
 import {
-  TokenError,
-  InvalidTokenError,
   ExpiredTokenError,
+  InvalidTokenError,
   MalformedTokenError,
+  TokenError,
 } from '../errors';
 
 /**
@@ -15,9 +15,9 @@ import {
  * @returns The generated JWT token string
  */
 export function generateToken<T extends JwtPayload = JwtPayload>(
-  payload: T,
-  secret: string,
-  options?: JwtOptions
+  _payload: T,
+  _secret: string,
+  _options?: JwtOptions
 ): string {
   // TODO: Implement JWT token generation logic
   return '';
@@ -39,12 +39,14 @@ export function verifyToken<T extends JwtPayload = JwtPayload>(
       return decoded as T;
     }
     throw new MalformedTokenError('Token payload is malformed');
-  } catch (error: any) {
-    if (error.name === 'TokenExpiredError') {
-      throw new ExpiredTokenError('Token has expired');
-    }
-    if (error.name === 'JsonWebTokenError') {
-      throw new InvalidTokenError('Invalid token');
+  } catch (error: unknown) {
+    if (error instanceof Error) {
+      if (error.name === 'TokenExpiredError') {
+        throw new ExpiredTokenError('Token has expired');
+      }
+      if (error.name === 'JsonWebTokenError') {
+        throw new InvalidTokenError('Invalid token');
+      }
     }
     throw new TokenError('Token verification failed');
   }
@@ -56,7 +58,7 @@ export function verifyToken<T extends JwtPayload = JwtPayload>(
  * @returns The decoded payload or null if malformed
  */
 export function decodeToken<T extends JwtPayload = JwtPayload>(
-  token: string
+  _token: string
 ): T | null {
   // TODO: Implement JWT token decoding logic
   return null;
@@ -67,7 +69,7 @@ export function decodeToken<T extends JwtPayload = JwtPayload>(
  * @param token - The JWT token to check
  * @returns True if token is expired
  */
-export function isTokenExpired(token: string): boolean {
+export function isTokenExpired(_token: string): boolean {
   // TODO: Implement token expiration check logic
   return false;
 }
@@ -77,7 +79,7 @@ export function isTokenExpired(token: string): boolean {
  * @param token - The JWT token
  * @returns The expiration date or null if no expiration
  */
-export function getTokenExpiration(token: string): Date | null {
+export function getTokenExpiration(_token: string): Date | null {
   // TODO: Implement token expiration extraction logic
   return null;
 }
@@ -89,10 +91,10 @@ export function getTokenExpiration(token: string): Date | null {
  * @param options - Optional new options
  * @returns New token with refreshed expiration
  */
-export function refreshToken<T extends JwtPayload = JwtPayload>(
-  token: string,
-  secret: string,
-  options?: JwtOptions
+export function refreshToken(
+  _token: string,
+  _secret: string,
+  _options?: JwtOptions
 ): string {
   // TODO: Implement token refresh logic
   return '';

@@ -2,7 +2,7 @@
  * JWT Payload interface
  */
 export interface JwtPayload {
-  [key: string]: any;
+  [key: string]: unknown;
   iat?: number;
   exp?: number;
   iss?: string;
@@ -35,23 +35,23 @@ export interface HashOptions {
 /**
  * User lookup function type
  */
-export type GetUserById = (id: string) => Promise<any>;
+export type GetUserById = (id: string) => Promise<Record<string, unknown> | null>;
 
 /**
  * Middleware function type compatible with Express/Koa/Fastify
  */
 export type MiddlewareFunction = (
-  req: any,
-  res: any,
-  next: (err?: any) => void
+  req: Record<string, unknown>,
+  res: Record<string, unknown>,
+  next: (err?: Error) => void
 ) => void | Promise<void>;
 
 /**
  * Request object extended with user property
  */
 export interface AuthenticatedRequest {
-  user?: any;
-  [key: string]: any;
+  user?: Record<string, unknown>;
+  [key: string]: unknown;
 }
 
 /**
@@ -59,6 +59,6 @@ export interface AuthenticatedRequest {
  */
 export interface AuthenticatedResponse {
   status(code: number): AuthenticatedResponse;
-  json(data: any): void;
-  [key: string]: any;
+  json(data: unknown): void;
+  [key: string]: unknown;
 }
