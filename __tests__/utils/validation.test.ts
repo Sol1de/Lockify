@@ -19,12 +19,12 @@ describe('Validation Utilities', () => {
 
     it('should reject weak password', () => {
       const weakPasswords = [
-        'weak',                    // Too short
-        'NoNumbersOrSpecial',     // No numbers or special chars
-        'no-uppercase-123!',      // No uppercase
-        'NO-LOWERCASE-123!',      // No lowercase
-        'NoSpecialChars123',      // No special chars
-        'password'                // Forbidden password
+        'weak',
+        'NoNumbersOrSpecial',
+        'no-uppercase-123!',
+        'NO-LOWERCASE-123!',
+        'NoSpecialChars123',
+        'password'
       ];
       
       weakPasswords.forEach(password => {
@@ -38,12 +38,9 @@ describe('Validation Utilities', () => {
         requireSpecialChars: false,
         forbiddenPasswords: ['custom-forbidden']
       };
-      
-      // This should pass with custom options (no special chars required)
+
       expect(() => validatePasswordStrength('Simple123', customOptions)).not.toThrow();
       expect(validatePasswordStrength('Simple123', customOptions)).toBe(true);
-      
-      // This should fail due to custom forbidden list
       expect(() => validatePasswordStrength('custom-forbidden', customOptions)).toThrow(WeakPasswordError);
     });
 
@@ -90,9 +87,9 @@ describe('Validation Utilities', () => {
   describe('validateJwtSecret', () => {
     it('should validate strong JWT secret', () => {
       const strongSecrets = [
-        'MyVeryStrongJwtSecret123!@#$%^&*()',  // Has lowercase, uppercase, numbers, special chars
-        'AnotherGoodSecret789-+=_[]{}Test',    // Has lowercase, uppercase, numbers, special chars  
-        'ComplexSecret2023!withMixedChars123'  // Has lowercase, uppercase, numbers, special chars
+        'MyVeryStrongJwtSecret123!@#$%^&*()',
+        'AnotherGoodSecret789-+=_[]{}Test',
+        'ComplexSecret2023!withMixedChars123'
       ];
       
       strongSecrets.forEach(secret => {
@@ -102,11 +99,11 @@ describe('Validation Utilities', () => {
 
     it('should reject weak JWT secret', () => {
       const weakSecrets = [
-        '',                          // Empty
-        'short',                     // Too short
-        'toolowercaseonly',         // Only lowercase
-        'TOOUPPERCASE',             // Only uppercase
-        '1234567890123456789012345678901234567890' // Only numbers
+        '',
+        'short',
+        'toolowercaseonly',
+        'TOOUPPERCASE',
+        '1234567890123456789012345678901234567890'
       ];
       
       weakSecrets.forEach(secret => {
@@ -173,7 +170,7 @@ describe('Validation Utilities', () => {
       
       // Exact matches
       expect(isPasswordForbidden('password', forbiddenList)).toBe(true);
-      expect(isPasswordForbidden('PASSWORD', forbiddenList)).toBe(true); // Case insensitive
+      expect(isPasswordForbidden('PASSWORD', forbiddenList)).toBe(true);
       expect(isPasswordForbidden('admin', forbiddenList)).toBe(true);
       
       // Substantial part matches
@@ -188,7 +185,7 @@ describe('Validation Utilities', () => {
         'StrongPassword2023!',
         'MySecurePass',
         'ComplexPhrase789',
-        'pass' // Too short to be considered substantial part
+        'pass'
       ];
       
       allowedPasswords.forEach(password => {

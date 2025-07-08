@@ -86,8 +86,8 @@ describe('Header Utilities', () => {
       const invalidHeaders = [
         'InvalidFormat',
         '',
-        'Bearer', // Missing token
-        'Bearer ', // Missing token with space
+        'Bearer',
+        'Bearer ',
         'NoScheme token123'
       ];
       

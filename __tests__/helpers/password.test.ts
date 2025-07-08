@@ -8,8 +8,8 @@ describe('Password Helpers', () => {
       const hash = await hashPassword(password);
       
       expect(typeof hash).toBe('string');
-      expect(hash).toHaveLength(60); // bcrypt hashes are 60 characters
-      expect(hash.startsWith('$2b$')).toBe(true); // bcrypt format
+      expect(hash).toHaveLength(60);
+      expect(hash.startsWith('$2b$')).toBe(true);
       expect(hash).not.toBe(password);
     });
 
@@ -20,7 +20,7 @@ describe('Password Helpers', () => {
       
       expect(typeof hash).toBe('string');
       expect(hash).toHaveLength(60);
-      expect(hash).toContain('$10$'); // Should contain the salt rounds
+      expect(hash).toContain('$10$');
     });
 
     it('should throw HashError for invalid input', async () => {
@@ -71,11 +71,11 @@ describe('Password Helpers', () => {
     });
 
     it('should return false for weak passwords', () => {
-      expect(validatePassword('weak')).toBe(false); // too short
-      expect(validatePassword('nouppercasehere123!')).toBe(false); // no uppercase
-      expect(validatePassword('NOLOWERCASEHERE123!')).toBe(false); // no lowercase
-      expect(validatePassword('NoNumbersHere!')).toBe(false); // no numbers
-      expect(validatePassword('NoSpecialChars123')).toBe(false); // no special chars
+      expect(validatePassword('weak')).toBe(false);
+      expect(validatePassword('nouppercasehere123!')).toBe(false);
+      expect(validatePassword('NOLOWERCASEHERE123!')).toBe(false);
+      expect(validatePassword('NoNumbersHere!')).toBe(false);
+      expect(validatePassword('NoSpecialChars123')).toBe(false);
     });
   });
 
@@ -83,7 +83,7 @@ describe('Password Helpers', () => {
     it('should generate salt with default rounds', async () => {
       const salt = await generateSalt();
       expect(typeof salt).toBe('string');
-      expect(salt.startsWith('$2b$12$')).toBe(true); // Default 12 rounds
+      expect(salt.startsWith('$2b$12$')).toBe(true);
     });
 
     it('should generate salt with custom rounds', async () => {

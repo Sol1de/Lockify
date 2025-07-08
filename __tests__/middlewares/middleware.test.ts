@@ -156,10 +156,10 @@ describe('Middleware Functions', () => {
     });
 
     it('should deny access for user without role property', async () => {
-      const token = jwt.sign({ userId: '123' }, secret); // No role in token
+      const token = jwt.sign({ userId: '123' }, secret);
       const authMiddleware = requireRole(mockGetUserById, secret, ['user']);
       
-      const userWithoutRole = { id: '123', email: 'test@example.com' }; // No role property
+      const userWithoutRole = { id: '123', email: 'test@example.com' };
       mockGetUserById.mockResolvedValue(userWithoutRole);
       const req = { headers: { authorization: `Bearer ${token}` } };
       

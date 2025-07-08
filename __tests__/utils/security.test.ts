@@ -62,7 +62,7 @@ it('should generate consistent SHA-256 hash', () => {
       const data = 'test-data';
       const hash = hashSha256(data);
       expect(hash).toBe(hashSha256(data));
-      expect(hash).toHaveLength(64); // SHA-256 produces 64 char hex string
+      expect(hash).toHaveLength(64);
     });
 
 it('should generate different hashes for different inputs', () => {
