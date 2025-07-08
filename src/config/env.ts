@@ -98,7 +98,7 @@ export function loadEnvConfig(): EnvConfig {
   // Validate required variables
   validateRequiredEnvVars();
 
-  return {
+  const config: EnvConfig = {
     // Server
     port: parseIntEnv(process.env.PORT, 3000),
     nodeEnv: process.env.NODE_ENV || 'development',
@@ -112,10 +112,6 @@ export function loadEnvConfig(): EnvConfig {
     // Password Hashing
     bcryptSaltRounds: parseIntEnv(process.env.BCRYPT_SALT_ROUNDS, 12),
 
-    // Security
-    hmacSecret: process.env.HMAC_SECRET,
-    encryptionKey: process.env.ENCRYPTION_KEY,
-
     // CORS
     corsOrigin: process.env.CORS_ORIGIN || '*',
 
@@ -124,25 +120,44 @@ export function loadEnvConfig(): EnvConfig {
     rateLimitMaxRequests: parseIntEnv(process.env.RATE_LIMIT_MAX_REQUESTS, 100),
 
     // Cookies
-    cookieSecret: process.env.COOKIE_SECRET,
     cookieSecure: parseBooleanEnv(process.env.COOKIE_SECURE, false),
     cookieSameSite:
       (process.env.COOKIE_SAME_SITE as 'strict' | 'lax' | 'none') || 'lax',
 
     // Session
-    sessionSecret: process.env.SESSION_SECRET,
     sessionMaxAge: parseIntEnv(process.env.SESSION_MAX_AGE, 86400000), // 24 hours
-
-    // Database (optional)
-    databaseUrl: process.env.DATABASE_URL,
-
-    // Redis (optional)
-    redisUrl: process.env.REDIS_URL,
 
     // Logging
     logLevel: process.env.LOG_LEVEL || 'info',
     debug: process.env.DEBUG || '',
   };
+
+  // Conditionally add optional properties only if they are defined
+  if (process.env.HMAC_SECRET) {
+    config.hmacSecret = process.env.HMAC_SECRET;
+  }
+  
+  if (process.env.ENCRYPTION_KEY) {
+    config.encryptionKey = process.env.ENCRYPTION_KEY;
+  }
+  
+  if (process.env.COOKIE_SECRET) {
+    config.cookieSecret = process.env.COOKIE_SECRET;
+  }
+  
+  if (process.env.SESSION_SECRET) {
+    config.sessionSecret = process.env.SESSION_SECRET;
+  }
+  
+  if (process.env.DATABASE_URL) {
+    config.databaseUrl = process.env.DATABASE_URL;
+  }
+  
+  if (process.env.REDIS_URL) {
+    config.redisUrl = process.env.REDIS_URL;
+  }
+
+  return config;
 }
 
 /**
