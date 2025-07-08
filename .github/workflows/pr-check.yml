@@ -25,7 +25,10 @@ jobs:
       - name: Run linter
         run: npm run lint
 
-      - name: Run formatter check
+      - name: Format code with Prettier
+        run: npm run format
+
+      - name: Verify formatting
         run: npx prettier --check "src/**/*.ts"
 
       - name: TypeScript type check

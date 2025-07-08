@@ -25,7 +25,19 @@ jobs:
       - name: Run linter
         run: npm run lint:check
 
-      - name: Run formatter check
+      - name: Auto-format code with Prettier
+        run: |
+          echo "🎨 Formatting code with Prettier..."
+          npm run format
+          
+          if ! git diff --quiet; then
+            echo "✨ Code formatting applied automatically"
+            echo "📝 Files were reformatted for consistent style"
+          else
+            echo "✅ Code was already properly formatted"
+          fi
+
+      - name: Verify formatting consistency
         run: npx prettier --check "src/**/*.ts"
 
       - name: Run tests

@@ -9,7 +9,7 @@ export function generateSecureRandom(length: number = 32): string {
   if (length <= 0 || !Number.isInteger(length)) {
     throw new Error('Length must be a positive integer');
   }
-  
+
   const bytesNeeded = Math.ceil(length / 2);
   const randomBytes = crypto.randomBytes(bytesNeeded);
   return randomBytes.toString('hex').slice(0, length);

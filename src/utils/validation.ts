@@ -23,7 +23,7 @@ export const DEFAULT_PASSWORD_OPTIONS: Required<PasswordValidationOptions> = {
   requireLowercase: true,
   requireNumbers: true,
   requireSpecialChars: true,
-  forbiddenPasswords: ['password', '12345678', 'qwerty', 'admin']
+  forbiddenPasswords: ['password', '12345678', 'qwerty', 'admin'],
 };
 
 /**
@@ -33,31 +33,37 @@ export const DEFAULT_PASSWORD_OPTIONS: Required<PasswordValidationOptions> = {
  * @returns True if password meets requirements
  */
 export function validatePasswordStrength(
-  password: string, 
+  password: string,
   options: PasswordValidationOptions = {}
 ): boolean {
   const settings = { ...DEFAULT_PASSWORD_OPTIONS, ...options };
-  
-  if (password.length < settings.minLength || password.length > settings.maxLength) {
+
+  if (
+    password.length < settings.minLength ||
+    password.length > settings.maxLength
+  ) {
     throw new WeakPasswordError('Password does not meet length requirements.');
   }
 
   if (settings.requireUppercase && !/[A-Z]/.test(password)) {
     throw new WeakPasswordError('Password must contain an uppercase letter.');
   }
-  
+
   if (settings.requireLowercase && !/[a-z]/.test(password)) {
     throw new WeakPasswordError('Password must contain a lowercase letter.');
   }
-  
+
   if (settings.requireNumbers && !/[0-9]/.test(password)) {
     throw new WeakPasswordError('Password must contain a number.');
   }
-  
-  if (settings.requireSpecialChars && !/[!@#$%^&*(),.?":{}|<>]/.test(password)) {
+
+  if (
+    settings.requireSpecialChars &&
+    !/[!@#$%^&*(),.?":{}|<>]/.test(password)
+  ) {
     throw new WeakPasswordError('Password must contain a special character.');
   }
-  
+
   if (isPasswordForbidden(password, settings.forbiddenPasswords)) {
     throw new WeakPasswordError('Password is too common.');
   }
@@ -75,8 +81,9 @@ export function validateEmail(email: string): boolean {
     return false;
   }
 
-  const emailRegex = /^[a-zA-Z0-9.!#$%&'*+\/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*$/;
-  
+  const emailRegex =
+    /^[a-zA-Z0-9.!#$%&'*+\/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*$/;
+
   return emailRegex.test(email.trim());
 }
 
@@ -102,8 +109,12 @@ export function validateJwtSecret(secret: string): boolean {
   const hasSpecialChars = /[!@#$%^&*(),.?":{}|<>\-_=+]/.test(secret);
 
   // At least 3 out of 4 character types should be present
-  const characterTypeCount = [hasLowercase, hasUppercase, hasNumbers, hasSpecialChars]
-    .filter(Boolean).length;
+  const characterTypeCount = [
+    hasLowercase,
+    hasUppercase,
+    hasNumbers,
+    hasSpecialChars,
+  ].filter(Boolean).length;
 
   return characterTypeCount >= 3;
 }
@@ -114,29 +125,30 @@ export function validateJwtSecret(secret: string): boolean {
  * @returns Sanitized input string
  */
 export function sanitizeInput(input: string): string {
-
-  return input
-    // Remove HTML tags
-    .replace(/<[^>]*>/g, '')
-    // Remove script tags and their content
-    .replace(/<script[^>]*>[\s\S]*?<\/script>/gi, '')
-    // Remove javascript: protocol
-    .replace(/javascript:/gi, '')
-    // Remove on* event handlers
-    .replace(/\son\w+\s*=/gi, '')
-    // Replace potentially dangerous characters
-    .replace(/[<>"'&]/g, (match) => {
-      const entities: { [key: string]: string } = {
-        '<': '&lt;',
-        '>': '&gt;',
-        '"': '&quot;',
-        "'": '&#x27;',
-        '&': '&amp;'
-      };
-      return entities[match] || match;
-    })
-    // Trim whitespace
-    .trim();
+  return (
+    input
+      // Remove HTML tags
+      .replace(/<[^>]*>/g, '')
+      // Remove script tags and their content
+      .replace(/<script[^>]*>[\s\S]*?<\/script>/gi, '')
+      // Remove javascript: protocol
+      .replace(/javascript:/gi, '')
+      // Remove on* event handlers
+      .replace(/\son\w+\s*=/gi, '')
+      // Replace potentially dangerous characters
+      .replace(/[<>"'&]/g, match => {
+        const entities: { [key: string]: string } = {
+          '<': '&lt;',
+          '>': '&gt;',
+          '"': '&quot;',
+          "'": '&#x27;',
+          '&': '&amp;',
+        };
+        return entities[match] || match;
+      })
+      // Trim whitespace
+      .trim()
+  );
 }
 
 /**
@@ -145,7 +157,10 @@ export function sanitizeInput(input: string): string {
  * @param forbiddenList - List of forbidden passwords
  * @returns True if password is forbidden
  */
-export function isPasswordForbidden(password: string, forbiddenList: string[]): boolean {
+export function isPasswordForbidden(
+  password: string,
+  forbiddenList: string[]
+): boolean {
   if (!password || !forbiddenList || !Array.isArray(forbiddenList)) {
     return false;
   }
@@ -153,7 +168,11 @@ export function isPasswordForbidden(password: string, forbiddenList: string[]): 
   const normalizedPassword = password.toLowerCase().trim();
 
   // Check exact matches
-  if (forbiddenList.some(forbidden => forbidden.toLowerCase() === normalizedPassword)) {
+  if (
+    forbiddenList.some(
+      forbidden => forbidden.toLowerCase() === normalizedPassword
+    )
+  ) {
     return true;
   }
 
@@ -161,9 +180,11 @@ export function isPasswordForbidden(password: string, forbiddenList: string[]): 
   return forbiddenList.some(forbidden => {
     const normalizedForbidden = forbidden.toLowerCase().trim();
     // Only consider forbidden passwords of 4+ characters to avoid false positives
-    return normalizedForbidden.length >= 4 &&
-           normalizedPassword.includes(normalizedForbidden) &&
-           // The forbidden word should make up at least 50% of the password
-           normalizedForbidden.length >= (normalizedPassword.length / 2);
+    return (
+      normalizedForbidden.length >= 4 &&
+      normalizedPassword.includes(normalizedForbidden) &&
+      // The forbidden word should make up at least 50% of the password
+      normalizedForbidden.length >= normalizedPassword.length / 2
+    );
   });
 }
