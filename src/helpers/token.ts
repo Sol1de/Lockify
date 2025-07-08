@@ -1,6 +1,5 @@
 import jwt from 'jsonwebtoken';
-import { JwtPayload } from '../types';
-import { SignOptions } from 'jsonwebtoken';
+import { JwtPayload, JwtOptions } from '../types';
 import { 
   TokenError, 
   InvalidTokenError, 
@@ -16,11 +15,39 @@ import {
  * @returns The generated JWT token string
  */
 export function generateToken<T extends JwtPayload = JwtPayload>(
-  payload: T,
-  secret: string,
-  options?: SignOptions
+  payload: T, 
+  secret: string, 
+  options?: JwtOptions
 ): string {
-  return jwt.sign(payload, secret, options);
+  // TODO: Implement JWT token generation logic
+  throw new Error('generateToken not implemented');
+}
+
+/**
+ * Verify and decode a JWT token
+ * @param token - The JWT token to verify
+ * @param secret - The secret key for verification
+ * @returns The decoded payload or null if invalid
+ */
+export function verifyToken<T extends JwtPayload = JwtPayload>(
+  token: string,
+  secret: string
+): T {
+  try {
+    const decoded = jwt.verify(token, secret);
+    if (typeof decoded === 'object' && decoded !== null) {
+      return decoded as T;
+    }
+    throw new MalformedTokenError('Token payload is malformed');
+  } catch (error: any) {
+    if (error.name === 'TokenExpiredError') {
+      throw new ExpiredTokenError('Token has expired');
+    }
+    if (error.name === 'JsonWebTokenError') {
+      throw new InvalidTokenError('Invalid token');
+    }
+    throw new TokenError('Token verification failed');
+  }
 }
 
 /**
@@ -29,15 +56,8 @@ export function generateToken<T extends JwtPayload = JwtPayload>(
  * @returns The decoded payload or null if malformed
  */
 export function decodeToken<T extends JwtPayload = JwtPayload>(token: string): T | null {
-  try {
-    const decoded = jwt.decode(token);
-    if (typeof decoded === 'object' && decoded !== null) {
-      return decoded as T;
-    }
-    throw new MalformedTokenError('Token payload is malformed');
-  } catch (error) {
-    throw new MalformedTokenError('Failed to decode token');
-  }
+  // TODO: Implement JWT token decoding logic
+  throw new Error('decodeToken not implemented');
 }
 
 /**
@@ -46,11 +66,8 @@ export function decodeToken<T extends JwtPayload = JwtPayload>(token: string): T
  * @returns True if token is expired
  */
 export function isTokenExpired(token: string): boolean {
-  const decoded = decodeToken<JwtPayload>(token);
-  if (!decoded || !decoded.exp) return true;
-
-  const nowInSeconds = Math.floor(Date.now() / 1000);
-  return decoded.exp < nowInSeconds;
+  // TODO: Implement token expiration check logic
+  throw new Error('isTokenExpired not implemented');
 }
 
 /**
@@ -59,11 +76,8 @@ export function isTokenExpired(token: string): boolean {
  * @returns The expiration date or null if no expiration
  */
 export function getTokenExpiration(token: string): Date | null {
-  const decoded = decodeToken<JwtPayload>(token);
-  if (decoded?.exp) {
-    return new Date(decoded.exp * 1000);
-  }
-  return null;
+  // TODO: Implement token expiration extraction logic
+  throw new Error('getTokenExpiration not implemented');
 }
 
 /**
@@ -76,15 +90,8 @@ export function getTokenExpiration(token: string): Date | null {
 export function refreshToken<T extends JwtPayload = JwtPayload>(
   token: string,
   secret: string,
-  options?: SignOptions
+  options?: JwtOptions
 ): string {
-  const decoded = decodeToken<T>(token);
-  if (!decoded) {
-    throw new InvalidTokenError('Cannot refresh invalid token');
-  }
-
-  
-  const { iat, exp, nbf, ...payload } = decoded as any;
-
-  return generateToken(payload as T, secret, options);
+  // TODO: Implement token refresh logic
+  throw new Error('refreshToken not implemented');
 }
