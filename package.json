@@ -1,6 +1,6 @@
 {
-  "name": "lockify",
-  "version": "1.0.2",
+  "name": "@soldead/lockify",
+  "version": "1.0.0",
   "description": "A lightweight, framework-agnostic authentication package for Node.js with bcrypt and JWT helpers",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",

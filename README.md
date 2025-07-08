@@ -2,7 +2,7 @@
 
 A lightweight, framework-agnostic authentication package for Node.js with bcrypt and JWT helpers. Designed to be simple, secure, and compatible with all Node.js frameworks.
 
-[![npm version](https://badge.fury.io/js/lockify.svg)](https://badge.fury.io/js/lockify)
+[![npm version](https://badge.fury.io/js/lockify.svg)]( https://www.npmjs.com/package/@soldead/lockify)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![TypeScript](https://img.shields.io/badge/TypeScript-Ready-blue.svg)](https://www.typescriptlang.org/)
 
