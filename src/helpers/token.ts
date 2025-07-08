@@ -32,9 +32,22 @@ export function generateToken<T extends JwtPayload = JwtPayload>(
 export function verifyToken<T extends JwtPayload = JwtPayload>(
   token: string,
   secret: string
-): T | null {
-  // TODO: Implement JWT token verification logic
-  return null;
+): T {
+  try {
+    const decoded = jwt.verify(token, secret);
+    if (typeof decoded === 'object' && decoded !== null) {
+      return decoded as T;
+    }
+    throw new MalformedTokenError('Token payload is malformed');
+  } catch (error: any) {
+    if (error.name === 'TokenExpiredError') {
+      throw new ExpiredTokenError('Token has expired');
+    }
+    if (error.name === 'JsonWebTokenError') {
+      throw new InvalidTokenError('Invalid token');
+    }
+    throw new TokenError('Token verification failed');
+  }
 }
 
 /**
