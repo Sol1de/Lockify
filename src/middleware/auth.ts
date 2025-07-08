@@ -1,4 +1,13 @@
-import { GetUserById, MiddlewareFunction } from '../types';
+import { GetUserById, MiddlewareFunction, AuthenticatedRequest, AuthenticatedResponse } from '../types';
+import { verifyToken } from '../helpers/token';
+import { extractTokenFromHeader } from '../utils/headers';
+import {
+  MissingTokenError,
+  InvalidTokenError,
+  ExpiredTokenError,
+  UserNotFoundError,
+  TokenError,
+} from '../errors';
 
 /**
  * Create an authentication middleware function
@@ -7,12 +16,50 @@ import { GetUserById, MiddlewareFunction } from '../types';
  * @returns Middleware function compatible with Express/Koa/Fastify
  */
 export function requireAuth(
-  _getUserById: GetUserById,
-  _secret: string
+  getUserById: GetUserById,
+  secret: string
 ): MiddlewareFunction {
-  // TODO: Implement authentication middleware logic
-  return async (req: unknown, res: unknown, next: () => void) => {
-    next();
+  return async (req: Record<string, unknown>, res: Record<string, unknown>, next: (err?: Error) => void) => {
+    try {
+      // Extract token from Authorization header
+      const authHeader = (req as any).headers?.authorization;
+      const token = extractTokenFromHeader(authHeader);
+      
+      if (!token) {
+        (res as any).status(401).json({ error: 'Token is missing' });
+        return;
+      }
+      
+      // Verify token
+      const decoded = verifyToken(token, secret);
+      
+      // Get user by ID from token
+      const userId = decoded.userId || decoded.sub;
+      if (!userId) {
+        (res as any).status(401).json({ error: 'Invalid token payload' });
+        return;
+      }
+      
+      const user = await getUserById(String(userId));
+      if (!user) {
+        (res as any).status(404).json({ error: 'User not found' });
+        return;
+      }
+      
+      // Attach user to request
+      (req as any).user = user;
+      next();
+    } catch (error) {
+      if (error instanceof InvalidTokenError) {
+        (res as any).status(401).json({ error: 'Invalid token' });
+      } else if (error instanceof ExpiredTokenError) {
+        (res as any).status(401).json({ error: 'Token has expired' });
+      } else if (error instanceof UserNotFoundError) {
+        (res as any).status(404).json({ error: 'User not found' });
+      } else {
+        (res as any).status(401).json({ error: 'Authentication failed' });
+      }
+    }
   };
 }
 
@@ -23,12 +70,43 @@ export function requireAuth(
  * @returns Middleware function that adds user to request if token is valid
  */
 export function optionalAuth(
-  _getUserById: GetUserById,
-  _secret: string
+  getUserById: GetUserById,
+  secret: string
 ): MiddlewareFunction {
-  // TODO: Implement optional authentication middleware logic
-  return async (req: unknown, res: unknown, next: () => void) => {
-    next();
+  return async (req: Record<string, unknown>, res: Record<string, unknown>, next: (err?: Error) => void) => {
+    try {
+      // Extract token from Authorization header
+      const authHeader = (req as any).headers?.authorization;
+      const token = extractTokenFromHeader(authHeader);
+      
+      if (!token) {
+        // No token provided, continue without authentication
+        next();
+        return;
+      }
+      
+      try {
+        // Verify token
+        const decoded = verifyToken(token, secret);
+        
+        // Get user by ID from token
+        const userId = decoded.userId || decoded.sub;
+        if (userId) {
+          const user = await getUserById(String(userId));
+          if (user) {
+            (req as any).user = user;
+          }
+        }
+      } catch (error) {
+        // Token verification failed, but this is optional auth so we continue
+        // without setting req.user
+      }
+      
+      next();
+    } catch (error) {
+      // For optional auth, we don't fail on errors
+      next();
+    }
   };
 }
 
@@ -40,12 +118,58 @@ export function optionalAuth(
  * @returns Middleware function that checks user role
  */
 export function requireRole(
-  _getUserById: GetUserById,
-  _secret: string,
-  _allowedRoles: string[]
+  getUserById: GetUserById,
+  secret: string,
+  allowedRoles: string[]
 ): MiddlewareFunction {
-  // TODO: Implement role-based authentication middleware logic
-  return async (req: unknown, res: unknown, next: () => void) => {
-    next();
+  return async (req: Record<string, unknown>, res: Record<string, unknown>, next: (err?: Error) => void) => {
+    try {
+      // First authenticate the user
+      const authHeader = (req as any).headers?.authorization;
+      const token = extractTokenFromHeader(authHeader);
+      
+      if (!token) {
+        (res as any).status(401).json({ error: 'Token is missing' });
+        return;
+      }
+      
+      // Verify token
+      const decoded = verifyToken(token, secret);
+      
+      // Get user by ID from token
+      const userId = decoded.userId || decoded.sub;
+      if (!userId) {
+        (res as any).status(401).json({ error: 'Invalid token payload' });
+        return;
+      }
+      
+      const user = await getUserById(String(userId));
+      if (!user) {
+        (res as any).status(404).json({ error: 'User not found' });
+        return;
+      }
+      
+      // Check role from token payload or user object
+      const userRole = decoded.role || (user as any).role;
+      
+      if (!userRole || !allowedRoles.includes(String(userRole))) {
+        (res as any).status(403).json({ error: 'Insufficient permissions' });
+        return;
+      }
+      
+      // Attach user to request
+      (req as any).user = user;
+      next();
+    } catch (error) {
+      if (error instanceof InvalidTokenError) {
+        (res as any).status(401).json({ error: 'Invalid token' });
+      } else if (error instanceof ExpiredTokenError) {
+        (res as any).status(401).json({ error: 'Token has expired' });
+      } else if (error instanceof UserNotFoundError) {
+        (res as any).status(404).json({ error: 'User not found' });
+      } else {
+        (res as any).status(401).json({ error: 'Authentication failed' });
+      }
+    }
   };
 }

@@ -3,6 +3,17 @@ import { AuthError, MissingTokenError, UserNotFoundError } from '../../src/error
 import { generateToken } from '../../src/helpers/token';
 import jwt from 'jsonwebtoken';
 
+// Extended types for testing
+interface TestRequest {
+  headers: { authorization?: string; [key: string]: any };
+  user?: any;
+}
+
+interface TestResponse {
+  status: jest.Mock;
+  json: jest.Mock;
+}
+
 describe('Middleware Functions', () => {
   const mockGetUserById = jest.fn();
   const mockReq = { headers: {} };
@@ -27,7 +38,7 @@ describe('Middleware Functions', () => {
       
       await authMiddleware(req, mockRes, mockNext);
       
-      expect(req.user).toEqual(testUser);
+      expect((req as TestRequest).user).toEqual(testUser);
       expect(mockNext).toHaveBeenCalledWith();
       expect(mockRes.status).not.toHaveBeenCalled();
     });
@@ -85,7 +96,7 @@ describe('Middleware Functions', () => {
       
       await authMiddleware(req, mockRes, mockNext);
       
-      expect(req.user).toEqual(testUser);
+      expect((req as TestRequest).user).toEqual(testUser);
       expect(mockNext).toHaveBeenCalledWith();
       expect(mockRes.status).not.toHaveBeenCalled();
     });
@@ -96,7 +107,7 @@ describe('Middleware Functions', () => {
       
       await authMiddleware(req, mockRes, mockNext);
       
-      expect(req.user).toBeUndefined();
+      expect((req as TestRequest).user).toBeUndefined();
       expect(mockNext).toHaveBeenCalledWith();
       expect(mockRes.status).not.toHaveBeenCalled();
     });
@@ -107,7 +118,7 @@ describe('Middleware Functions', () => {
       
       await authMiddleware(req, mockRes, mockNext);
       
-      expect(req.user).toBeUndefined();
+      expect((req as TestRequest).user).toBeUndefined();
       expect(mockNext).toHaveBeenCalledWith();
       expect(mockRes.status).not.toHaveBeenCalled();
     });
@@ -123,7 +134,7 @@ describe('Middleware Functions', () => {
       
       await authMiddleware(req, mockRes, mockNext);
       
-      expect(req.user).toEqual(testUser);
+      expect((req as TestRequest).user).toEqual(testUser);
       expect(mockNext).toHaveBeenCalledWith();
       expect(mockRes.status).not.toHaveBeenCalled();
     });

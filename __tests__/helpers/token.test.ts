@@ -24,7 +24,7 @@ describe('Token Helpers', () => {
     });
 
     it('should generate token with custom options', () => {
-      const options = { expiresIn: '1h' };
+      const options = { expiresIn: '1h' as const };
       const token = generateToken(payload, secret, options);
       const decoded = jwt.verify(token, secret) as jwt.JwtPayload;
 
@@ -109,7 +109,7 @@ describe('Token Helpers', () => {
       const oldExp = getTokenExpiration(token);
       const newExp = getTokenExpiration(newToken);
 
-      expect(newExp).toBeGreaterThan(oldExp!);
+      expect(newExp!.getTime()).toBeGreaterThan(oldExp!.getTime());
     });
 
     it('should preserve original payload in refreshed token', () => {

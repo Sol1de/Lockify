@@ -1,6 +1,7 @@
 import bcrypt from 'bcrypt';
 import { HashOptions } from '../types';
-import { HashError } from '../errors';
+import { HashError, WeakPasswordError } from '../errors';
+import { validatePasswordStrength, PasswordValidationOptions } from '../utils/validation';
 
 /**
  * Default salt rounds for bcrypt hashing
@@ -31,8 +32,20 @@ export async function hashPassword(password: string, options?: HashOptions): Pro
  */
 export async function comparePassword(password: string, hash: string): Promise<boolean> {
   try {
+    if (!password || !hash) {
+      throw new HashError('Password and hash are required');
+    }
+    
+    // Check if hash looks like a valid bcrypt hash
+    if (!hash.startsWith('$2') || hash.length < 50) {
+      throw new HashError('Failed to compare password');
+    }
+    
     return await bcrypt.compare(password, hash);
   } catch (error) {
+    if (error instanceof HashError) {
+      throw error;
+    }
     throw new HashError('Failed to compare password');
   }
 }
@@ -40,22 +53,23 @@ export async function comparePassword(password: string, hash: string): Promise<b
 /**
  * Validate password strength
  * @param password - The password to validate
- * @returns True if password meets security requirements
+ * @param options - Optional validation options
+ * @returns True if password meets security requirements, false otherwise
  */
-export function validatePassword(password: string): boolean {
-  const minLength = 8;
-  const hasUppercase = /[A-Z]/.test(password);
-  const hasLowercase = /[a-z]/.test(password);
-  const hasDigit = /[0-9]/.test(password);
-  const hasSpecialChar = /[!@#$%^&*(),.?":{}|<>]/.test(password);
-
-  return (
-    password.length >= minLength &&
-    hasUppercase &&
-    hasLowercase &&
-    hasDigit &&
-    hasSpecialChar
-  );
+export function validatePassword(
+  password: string,
+  options?: PasswordValidationOptions
+): boolean {
+  if (!password || typeof password !== 'string') {
+    return false;
+  }
+  
+  try {
+    return validatePasswordStrength(password, options);
+  } catch (error) {
+    // If validation throws an error (weak password), return false
+    return false;
+  }
 }
 
 /**
@@ -65,8 +79,57 @@ export function validatePassword(password: string): boolean {
  */
 export async function generateSalt(rounds: number = DEFAULT_SALT_ROUNDS): Promise<string> {
   try {
+    if (rounds < 4 || rounds > 31) {
+      throw new Error('Salt rounds must be between 4 and 31');
+    }
     return await bcrypt.genSalt(rounds);
   } catch (error) {
     throw new HashError('Failed to generate salt');
+  }
+}
+
+/**
+ * Hash a password with validation
+ * @param password - The plain text password to hash
+ * @param options - Optional hashing options
+ * @param validationOptions - Optional password validation options
+ * @returns Promise that resolves to the hashed password
+ * @throws WeakPasswordError if password doesn't meet requirements
+ */
+export async function hashPasswordWithValidation(
+  password: string,
+  options?: HashOptions,
+  validationOptions?: PasswordValidationOptions
+): Promise<string> {
+  // First validate the password
+  validatePassword(password, validationOptions);
+  
+  // Then hash it
+  return hashPassword(password, options);
+}
+
+/**
+ * Get information about a bcrypt hash
+ * @param hash - The bcrypt hash to analyze
+ * @returns Information about the hash (salt rounds, etc.)
+ */
+export function getHashInfo(hash: string): { saltRounds: number; isValid: boolean } {
+  try {
+    // Bcrypt hash format: $2[a/b]$rounds$salt+hash
+    const parts = hash.split('$');
+    
+    if (parts.length !== 4 || !parts[1] || !parts[2]) {
+      return { saltRounds: 0, isValid: false };
+    }
+    
+    const rounds = parseInt(parts[2], 10);
+    
+    if (isNaN(rounds)) {
+      return { saltRounds: 0, isValid: false };
+    }
+    
+    return { saltRounds: rounds, isValid: true };
+  } catch (error) {
+    return { saltRounds: 0, isValid: false };
   }
 }

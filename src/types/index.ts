@@ -1,3 +1,5 @@
+import type { StringValue } from 'ms';
+
 /**
  * JWT Payload interface
  */
@@ -14,14 +16,14 @@ export interface JwtPayload {
  * JWT Options interface for token generation
  */
 export interface JwtOptions {
-  expiresIn?: string | number;
+  expiresIn?: StringValue | number;
   issuer?: string;
   audience?: string | string[];
   subject?: string;
-  algorithm?: 'HS256' | 'HS384' | 'HS512' | 'RS256' | 'RS384' | 'RS512';
+  algorithm?: 'HS256' | 'HS384' | 'HS512' | 'RS256' | 'RS384' | 'RS512' | 'PS256' | 'PS384' | 'PS512' | 'ES256' | 'ES384' | 'ES512' | 'none';
   keyid?: string;
   noTimestamp?: boolean;
-  header?: object;
+  header?: { [key: string]: unknown };
   encoding?: string;
 }
 

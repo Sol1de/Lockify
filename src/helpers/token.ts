@@ -6,6 +6,8 @@ import {
   MalformedTokenError,
   TokenError,
 } from '../errors';
+import { validateJwtSecret } from '../utils/validation';
+import { generateJwtSecret } from '../utils/security';
 
 /**
  * Generate a JWT token with the given payload and secret
@@ -15,12 +17,59 @@ import {
  * @returns The generated JWT token string
  */
 export function generateToken<T extends JwtPayload = JwtPayload>(
-  _payload: T,
-  _secret: string,
-  _options?: JwtOptions
+  payload: T,
+  secret: string,
+  options?: JwtOptions
 ): string {
-  // TODO: Implement JWT token generation logic
-  return '';
+  try {
+    if (!secret) {
+      throw new TokenError('Secret is required for token generation');
+    }
+    
+    if (!payload || typeof payload !== 'object') {
+      throw new TokenError('Payload must be an object');
+    }
+    
+    const jwtOptions: jwt.SignOptions = {};
+    
+    if (options?.expiresIn !== undefined) {
+      jwtOptions.expiresIn = options.expiresIn;
+    }
+    if (options?.issuer) {
+      jwtOptions.issuer = options.issuer;
+    }
+    if (options?.audience) {
+      jwtOptions.audience = options.audience;
+    }
+    if (options?.subject) {
+      jwtOptions.subject = options.subject;
+    }
+    if (options?.algorithm) {
+      jwtOptions.algorithm = options.algorithm;
+    }
+    if (options?.keyid) {
+      jwtOptions.keyid = options.keyid;
+    }
+    if (options?.noTimestamp) {
+      jwtOptions.noTimestamp = options.noTimestamp;
+    }
+    if (options?.header) {
+      jwtOptions.header = {
+        alg: options.algorithm || 'HS256',
+        ...options.header,
+      };
+    }
+    if (options?.encoding) {
+      jwtOptions.encoding = options.encoding;
+    }
+    
+    return jwt.sign(payload, secret, jwtOptions);
+  } catch (error) {
+    if (error instanceof TokenError) {
+      throw error;
+    }
+    throw new TokenError('Failed to generate token');
+  }
 }
 
 /**
@@ -58,10 +107,23 @@ export function verifyToken<T extends JwtPayload = JwtPayload>(
  * @returns The decoded payload or null if malformed
  */
 export function decodeToken<T extends JwtPayload = JwtPayload>(
-  _token: string
+  token: string
 ): T | null {
-  // TODO: Implement JWT token decoding logic
-  return null;
+  try {
+    if (!token || typeof token !== 'string') {
+      return null;
+    }
+    
+    const decoded = jwt.decode(token, { complete: false });
+    
+    if (decoded && typeof decoded === 'object') {
+      return decoded as T;
+    }
+    
+    return null;
+  } catch (error) {
+    return null;
+  }
 }
 
 /**
@@ -69,9 +131,18 @@ export function decodeToken<T extends JwtPayload = JwtPayload>(
  * @param token - The JWT token to check
  * @returns True if token is expired
  */
-export function isTokenExpired(_token: string): boolean {
-  // TODO: Implement token expiration check logic
-  return false;
+export function isTokenExpired(token: string): boolean {
+  try {
+    const decoded = decodeToken(token);
+    if (!decoded || !decoded.exp) {
+      return false; // No expiration set
+    }
+    
+    const currentTime = Math.floor(Date.now() / 1000);
+    return decoded.exp < currentTime;
+  } catch (error) {
+    return true; // If we can't decode, consider it expired
+  }
 }
 
 /**
@@ -79,9 +150,18 @@ export function isTokenExpired(_token: string): boolean {
  * @param token - The JWT token
  * @returns The expiration date or null if no expiration
  */
-export function getTokenExpiration(_token: string): Date | null {
-  // TODO: Implement token expiration extraction logic
-  return null;
+export function getTokenExpiration(token: string): Date | null {
+  try {
+    const decoded = decodeToken(token);
+    if (!decoded || !decoded.exp) {
+      return null;
+    }
+    
+    // JWT exp is in seconds, Date constructor expects milliseconds
+    return new Date(decoded.exp * 1000);
+  } catch (error) {
+    return null;
+  }
 }
 
 /**
@@ -92,10 +172,109 @@ export function getTokenExpiration(_token: string): Date | null {
  * @returns New token with refreshed expiration
  */
 export function refreshToken(
-  _token: string,
-  _secret: string,
-  _options?: JwtOptions
+  token: string,
+  secret: string,
+  options?: JwtOptions
 ): string {
-  // TODO: Implement token refresh logic
-  return '';
+  try {
+    // First verify the token to ensure it's valid
+    const decoded = verifyToken(token, secret);
+    
+    // Remove timing-sensitive claims that shouldn't be copied
+    const { iat, exp, ...payload } = decoded;
+    
+    // Generate new token with refreshed expiration
+    const refreshOptions: JwtOptions = {
+      expiresIn: '1h', // Default refresh expiration
+      ...options,
+    };
+    
+    return generateToken(payload, secret, refreshOptions);
+  } catch (error) {
+    if (error instanceof TokenError) {
+      throw error;
+    }
+    throw new TokenError('Failed to refresh token');
+  }
+}
+
+/**
+ * Generate a secure JWT secret
+ * @param length - Length of the secret (default: 64)
+ * @returns Secure JWT secret
+ */
+export function generateSecureSecret(length = 64): string {
+  return generateJwtSecret(length);
+}
+
+/**
+ * Validate JWT secret strength
+ * @param secret - The JWT secret to validate
+ * @returns True if secret meets security requirements
+ */
+export function validateSecret(secret: string): boolean {
+  return validateJwtSecret(secret);
+}
+
+/**
+ * Get token header information
+ * @param token - The JWT token
+ * @returns The token header or null if malformed
+ */
+export function getTokenHeader(token: string): Record<string, unknown> | null {
+  try {
+    const decoded = jwt.decode(token, { complete: true });
+    
+    if (decoded && typeof decoded === 'object' && decoded.header) {
+      return decoded.header as unknown as Record<string, unknown>;
+    }
+    
+    return null;
+  } catch (error) {
+    return null;
+  }
+}
+
+/**
+ * Check if token needs refresh (expires within specified minutes)
+ * @param token - The JWT token to check
+ * @param minutesBeforeExpiry - Minutes before expiry to consider for refresh (default: 15)
+ * @returns True if token should be refreshed
+ */
+export function shouldRefreshToken(token: string, minutesBeforeExpiry = 15): boolean {
+  try {
+    const decoded = decodeToken(token);
+    if (!decoded || !decoded.exp) {
+      return false; // No expiration set
+    }
+    
+    const currentTime = Math.floor(Date.now() / 1000);
+    const timeUntilExpiry = decoded.exp - currentTime;
+    const minutesUntilExpiry = timeUntilExpiry / 60;
+    
+    return minutesUntilExpiry <= minutesBeforeExpiry && minutesUntilExpiry > 0;
+  } catch (error) {
+    return true; // If we can't decode, suggest refresh
+  }
+}
+
+/**
+ * Get token time remaining in seconds
+ * @param token - The JWT token
+ * @returns Time remaining in seconds, or null if no expiration
+ */
+export function getTokenTimeRemaining(token: string): number | null {
+  try {
+    const decoded = decodeToken(token);
+    if (!decoded || !decoded.exp) {
+      return null;
+    }
+    
+    const currentTime = Math.floor(Date.now() / 1000);
+    const timeRemaining = decoded.exp - currentTime;
+    
+    return Math.max(0, timeRemaining);
+  } catch (error) {
+    return null;
+  }
 }
