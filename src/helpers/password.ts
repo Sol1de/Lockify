@@ -45,7 +45,6 @@ export async function comparePassword(
       throw new HashError('Password and hash are required');
     }
 
-    // Check if hash looks like a valid bcrypt hash
     if (!hash.startsWith('$2') || hash.length < 50) {
       throw new HashError('Failed to compare password');
     }
@@ -76,7 +75,6 @@ export function validatePassword(
   try {
     return validatePasswordStrength(password, options);
   } catch (error) {
-    // If validation throws an error (weak password), return false
     return false;
   }
 }
@@ -112,10 +110,7 @@ export async function hashPasswordWithValidation(
   options?: HashOptions,
   validationOptions?: PasswordValidationOptions
 ): Promise<string> {
-  // First validate the password
   validatePassword(password, validationOptions);
-
-  // Then hash it
   return hashPassword(password, options);
 }
 
@@ -129,7 +124,6 @@ export function getHashInfo(hash: string): {
   isValid: boolean;
 } {
   try {
-    // Bcrypt hash format: $2[a/b]$rounds$salt+hash
     const parts = hash.split('$');
 
     if (parts.length !== 4 || !parts[1] || !parts[2]) {

@@ -27,13 +27,13 @@ jobs:
 
       - name: Auto-format code with Prettier
         run: |
-          echo "🎨 Formatting code with Prettier..."
+          echo "Formatting code with Prettier..."
           npm run format
           
           if ! git diff --quiet; then
-            echo "✨ Code formatting applied automatically"
+            echo "Code formatting applied automatically"
           else
-            echo "✅ Code was already properly formatted"
+            echo "Code was already properly formatted"
           fi
 
       - name: Verify formatting consistency
@@ -52,14 +52,14 @@ jobs:
         continue-on-error: true
 
       - name: Build project
-        run: npm run build || echo "⚠️ Build errors (development mode)"
+        run: npm run build || echo "Build errors (development mode)"
 
       - name: Package validation
         run: |
           npm pack
           PACKAGE_FILE=$(ls *.tgz)
           npm install -g $PACKAGE_FILE
-          echo "✅ Package validation successful"
+          echo "Package validation successful"
 
       - name: Check coverage threshold
         run: |
@@ -68,7 +68,7 @@ jobs:
             COVERAGE=$(node -e "const fs = require('fs'); const data = JSON.parse(fs.readFileSync('coverage/coverage-summary.json', 'utf8')); console.log(data.total.lines.pct);")
             echo "Coverage: $COVERAGE%"
             if (( $(echo "$COVERAGE < $THRESHOLD" | bc -l) )); then
-              echo "❌ Coverage below $THRESHOLD%"
+              echo "Coverage below $THRESHOLD%"
               exit 1
             fi
           fi
