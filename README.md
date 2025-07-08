@@ -30,7 +30,17 @@ pnpm add lockify
 ## Quick Start
 
 ```typescript
-import { hashPassword, comparePassword, generateToken, verifyToken, requireAuth } from 'lockify';
+import { 
+  hashPassword, 
+  comparePassword, 
+  generateToken, 
+  verifyToken, 
+  requireAuth,
+  optionalAuth,
+  requireRole,
+  validatePassword,
+  generateSalt
+} from 'lockify';
 
 // Hash a password
 const hashedPassword = await hashPassword('mySecretPassword');
@@ -67,6 +77,30 @@ const isValid = await comparePassword('userPassword123', hashedPassword);
 console.log(isValid); // true or false
 ```
 
+#### `validatePassword(password: string, options?: PasswordValidationOptions): boolean`
+
+Validates password strength according to security requirements.
+
+```typescript
+const isStrong = validatePassword('MySecurePassword123!', {
+  minLength: 8,
+  requireUppercase: true,
+  requireLowercase: true,
+  requireNumbers: true,
+  requireSymbols: true
+});
+console.log(isStrong); // true or false
+```
+
+#### `generateSalt(rounds?: number): Promise<string>`
+
+Generates a random salt for bcrypt hashing.
+
+```typescript
+const salt = await generateSalt(12);
+console.log(salt); // $2b$12$...
+```
+
 ### JWT Helpers
 
 #### `generateToken(payload: JwtPayload, secret: string, options?: JwtOptions): string`
@@ -89,24 +123,65 @@ const token = generateToken(
 );
 ```
 
-#### `verifyToken(token: string, secret: string): JwtPayload | null`
+#### `verifyToken(token: string, secret: string): JwtPayload`
 
-Verifies and decodes a JWT token. Returns `null` if the token is invalid or expired.
+Verifies and decodes a JWT token. Throws an error if the token is invalid or expired.
 
 ```typescript
-const decoded = verifyToken(token, 'your-secret-key');
-if (decoded) {
+try {
+  const decoded = verifyToken(token, 'your-secret-key');
   console.log('User ID:', decoded.userId);
-} else {
-  console.log('Invalid token');
+} catch (error) {
+  console.log('Token verification failed:', error.message);
 }
+```
+
+#### `decodeToken(token: string): JwtPayload | null`
+
+Decodes a JWT token without verification (unsafe). Returns `null` if the token is malformed.
+
+```typescript
+const decoded = decodeToken(token);
+if (decoded) {
+  console.log('Token payload:', decoded);
+}
+```
+
+#### `isTokenExpired(token: string): boolean`
+
+Checks if a JWT token is expired.
+
+```typescript
+const expired = isTokenExpired(token);
+console.log('Token expired:', expired);
+```
+
+#### `getTokenExpiration(token: string): Date | null`
+
+Gets the expiration date of a JWT token.
+
+```typescript
+const expiration = getTokenExpiration(token);
+if (expiration) {
+  console.log('Token expires at:', expiration);
+}
+```
+
+#### `refreshToken(token: string, secret: string, options?: JwtOptions): string`
+
+Refreshes an existing token with a new expiration time.
+
+```typescript
+const newToken = refreshToken(oldToken, 'your-secret-key', {
+  expiresIn: '24h'
+});
 ```
 
 ### Authentication Middleware
 
 #### `requireAuth(getUserById: GetUserById, secret: string): MiddlewareFunction`
 
-Creates a middleware function that can be used with any Node.js framework.
+Creates a middleware function that requires authentication for accessing protected routes.
 
 ```typescript
 type GetUserById = (id: string) => Promise<any>;
@@ -117,6 +192,33 @@ const authMiddleware = requireAuth(
     return await db.users.findById(id);
   },
   'your-jwt-secret'
+);
+```
+
+#### `optionalAuth(getUserById: GetUserById, secret: string): MiddlewareFunction`
+
+Creates an optional authentication middleware that adds user information to the request if a valid token is provided, but doesn't fail if no token is present.
+
+```typescript
+const optionalAuthMiddleware = optionalAuth(
+  async (id: string) => {
+    return await db.users.findById(id);
+  },
+  'your-jwt-secret'
+);
+```
+
+#### `requireRole(getUserById: GetUserById, secret: string, allowedRoles: string[]): MiddlewareFunction`
+
+Creates a role-based authentication middleware that checks if the authenticated user has the required role(s).
+
+```typescript
+const adminMiddleware = requireRole(
+  async (id: string) => {
+    return await db.users.findById(id);
+  },
+  'your-jwt-secret',
+  ['admin', 'superuser']
 );
 ```
 
@@ -279,7 +381,14 @@ app.listen({ port: 3000 });
 Lockify is written in TypeScript and provides full type definitions:
 
 ```typescript
-import { JwtPayload, JwtOptions, GetUserById, AuthError } from 'lockify';
+import { 
+  JwtPayload, 
+  JwtOptions, 
+  GetUserById, 
+  AuthError,
+  HashOptions,
+  PasswordValidationOptions
+} from 'lockify';
 
 // Custom JWT payload
 interface CustomPayload extends JwtPayload {
@@ -304,6 +413,18 @@ const token = generateToken<CustomPayload>(
   },
   'secret'
 );
+
+// Hash password with custom options
+const hash = await hashPassword('password', { saltRounds: 14 });
+
+// Validate password with custom rules
+const isValid = validatePassword('password', {
+  minLength: 12,
+  requireUppercase: true,
+  requireLowercase: true,
+  requireNumbers: true,
+  requireSymbols: true
+});
 ```
 
 ## Error Handling
@@ -311,12 +432,27 @@ const token = generateToken<CustomPayload>(
 Lockify provides custom error classes for better error handling:
 
 ```typescript
-import { AuthError, TokenError, HashError } from 'lockify';
+import { 
+  AuthError, 
+  TokenError, 
+  HashError,
+  InvalidTokenError,
+  ExpiredTokenError,
+  MissingTokenError,
+  MalformedTokenError,
+  UserNotFoundError,
+  InvalidPasswordError,
+  WeakPasswordError
+} from 'lockify';
 
 try {
   const decoded = verifyToken(token, secret);
 } catch (error) {
-  if (error instanceof TokenError) {
+  if (error instanceof ExpiredTokenError) {
+    console.log('Token has expired:', error.message);
+  } else if (error instanceof InvalidTokenError) {
+    console.log('Invalid token:', error.message);
+  } else if (error instanceof TokenError) {
     console.log('Token error:', error.message);
   } else if (error instanceof AuthError) {
     console.log('Auth error:', error.message);
@@ -329,6 +465,13 @@ try {
 - `AuthError`: General authentication errors
 - `TokenError`: JWT token related errors
 - `HashError`: Password hashing related errors
+- `InvalidTokenError`: Invalid token format or signature
+- `ExpiredTokenError`: Token has expired
+- `MissingTokenError`: No token provided
+- `MalformedTokenError`: Token format is invalid
+- `UserNotFoundError`: User lookup failed
+- `InvalidPasswordError`: Password validation failed
+- `WeakPasswordError`: Password doesn't meet security requirements
 
 ## Advanced Configuration
 
@@ -340,11 +483,30 @@ interface JwtOptions {
   issuer?: string;
   audience?: string | string[];
   subject?: string;
-  algorithm?: 'HS256' | 'HS384' | 'HS512' | 'RS256' | 'RS384' | 'RS512';
+  algorithm?: 
+    | 'HS256' | 'HS384' | 'HS512'
+    | 'RS256' | 'RS384' | 'RS512'
+    | 'PS256' | 'PS384' | 'PS512'
+    | 'ES256' | 'ES384' | 'ES512'
+    | 'none';
   keyid?: string;
   noTimestamp?: boolean;
-  header?: object;
+  header?: { [key: string]: unknown };
   encoding?: string;
+}
+
+interface HashOptions {
+  saltRounds?: number;
+}
+
+interface PasswordValidationOptions {
+  minLength?: number;
+  maxLength?: number;
+  requireUppercase?: boolean;
+  requireLowercase?: boolean;
+  requireNumbers?: boolean;
+  requireSymbols?: boolean;
+  forbiddenPasswords?: string[];
 }
 ```
 
@@ -382,6 +544,96 @@ const token = generateToken(
   JWT_SECRET,
   { expiresIn: JWT_EXPIRES_IN }
 );
+```
+
+## Utility Functions
+
+Lockify provides additional utility functions for enhanced security and validation:
+
+### Header Utilities
+
+```typescript
+import {
+  extractTokenFromHeader,
+  extractBearerToken,
+  validateAuthHeader,
+  extractTokenByScheme,
+  extractTokenFromCookie
+} from 'lockify';
+
+// Extract token from Authorization header
+const token = extractTokenFromHeader('Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...');
+
+// Extract specifically Bearer tokens
+const bearerToken = extractBearerToken('Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...');
+
+// Extract token by custom scheme
+const customToken = extractTokenByScheme('Custom eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...', 'Custom');
+
+// Extract token from cookie string
+const cookieToken = extractTokenFromCookie('auth_token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...', 'auth_token');
+```
+
+### Validation Utilities
+
+```typescript
+import {
+  validatePasswordStrength,
+  validateEmail,
+  validateJwtSecret,
+  sanitizeInput,
+  isPasswordForbidden
+} from 'lockify';
+
+// Validate password strength
+const isStrong = validatePasswordStrength('MyPassword123!');
+
+// Validate email format
+const isValidEmail = validateEmail('user@example.com');
+
+// Validate JWT secret strength
+const isSecureSecret = validateJwtSecret('your-super-secret-key');
+
+// Sanitize user input
+const clean = sanitizeInput('<script>alert("xss")</script>user input');
+
+// Check if password is in forbidden list
+const isForbidden = isPasswordForbidden('password123', ['password123', '123456']);
+```
+
+### Security Utilities
+
+```typescript
+import {
+  generateSecureRandom,
+  generateJwtSecret,
+  hashSha256,
+  generateHmac,
+  verifyHmac,
+  constantTimeCompare,
+  generateUuid
+} from 'lockify';
+
+// Generate secure random bytes
+const randomBytes = generateSecureRandom(32);
+
+// Generate secure JWT secret
+const jwtSecret = generateJwtSecret(64);
+
+// Hash data with SHA-256
+const hash = hashSha256('data to hash');
+
+// Generate HMAC
+const hmac = generateHmac('data', 'secret');
+
+// Verify HMAC
+const isValid = verifyHmac('data', 'secret', hmac);
+
+// Constant-time string comparison
+const isEqual = constantTimeCompare('string1', 'string2');
+
+// Generate UUID
+const uuid = generateUuid();
 ```
 
 ## Testing
@@ -437,13 +689,28 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 ## Changelog
 
 ### v1.0.0
-- Initial release
-- Basic password hashing with bcrypt
-- JWT token generation and validation
-- Framework-agnostic authentication middleware
-- Full TypeScript support
-- Custom error handling
-- Advanced JWT options support
+- ✨ **Enhanced Authentication System**
+  - Password hashing with bcrypt and configurable salt rounds
+  - Advanced password validation with customizable strength requirements
+  - JWT token generation, verification, and management
+  - Token refresh functionality and expiration checking
+  - Multiple authentication middleware options (required, optional, role-based)
+- 🛡️ **Security Features**
+  - Comprehensive error handling with specific error types
+  - Secure random generation and HMAC utilities
+  - Constant-time comparison functions
+  - Input sanitization and validation
+- 🌐 **Framework Compatibility**
+  - Works with Express, Koa, Fastify, and other Node.js frameworks
+  - Framework-agnostic middleware design
+- 📝 **TypeScript Support**
+  - Full type definitions for all functions and interfaces
+  - Generic support for custom JWT payloads
+  - Type-safe middleware functions
+- 🧪 **Testing & Quality**
+  - Comprehensive test suite with Jest
+  - ESLint and Prettier configuration
+  - CI/CD pipeline integration
 
 ---
 
