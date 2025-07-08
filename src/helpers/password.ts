@@ -14,8 +14,13 @@ const DEFAULT_SALT_ROUNDS = 12;
  * @returns Promise that resolves to the hashed password
  */
 export async function hashPassword(password: string, options?: HashOptions): Promise<string> {
-  // TODO: Implement password hashing logic
-  throw new Error('hashPassword not implemented');
+  try {
+    const saltRounds = options?.saltRounds ?? DEFAULT_SALT_ROUNDS;
+    const salt = await generateSalt(saltRounds);
+    return await bcrypt.hash(password, salt);
+  } catch (error) {
+    throw new HashError('Failed to hash password');
+  }
 }
 
 /**
@@ -25,8 +30,11 @@ export async function hashPassword(password: string, options?: HashOptions): Pro
  * @returns Promise that resolves to true if passwords match, false otherwise
  */
 export async function comparePassword(password: string, hash: string): Promise<boolean> {
-  // TODO: Implement password comparison logic
-  throw new Error('comparePassword not implemented');
+  try {
+    return await bcrypt.compare(password, hash);
+  } catch (error) {
+    throw new HashError('Failed to compare password');
+  }
 }
 
 /**
@@ -35,8 +43,19 @@ export async function comparePassword(password: string, hash: string): Promise<b
  * @returns True if password meets security requirements
  */
 export function validatePassword(password: string): boolean {
-  // TODO: Implement password validation logic
-  throw new Error('validatePassword not implemented');
+  const minLength = 8;
+  const hasUppercase = /[A-Z]/.test(password);
+  const hasLowercase = /[a-z]/.test(password);
+  const hasDigit = /[0-9]/.test(password);
+  const hasSpecialChar = /[!@#$%^&*(),.?":{}|<>]/.test(password);
+
+  return (
+    password.length >= minLength &&
+    hasUppercase &&
+    hasLowercase &&
+    hasDigit &&
+    hasSpecialChar
+  );
 }
 
 /**
@@ -45,6 +64,9 @@ export function validatePassword(password: string): boolean {
  * @returns Promise that resolves to the generated salt
  */
 export async function generateSalt(rounds: number = DEFAULT_SALT_ROUNDS): Promise<string> {
-  // TODO: Implement salt generation logic
-  throw new Error('generateSalt not implemented');
+  try {
+    return await bcrypt.genSalt(rounds);
+  } catch (error) {
+    throw new HashError('Failed to generate salt');
+  }
 }
