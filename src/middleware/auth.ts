@@ -1,11 +1,11 @@
 import { GetUserById, MiddlewareFunction } from '../types';
 import { verifyToken } from '../helpers/token';
 import { extractTokenFromHeader } from '../utils/headers';
-import { 
-  AuthError, 
-  MissingTokenError, 
-  InvalidTokenError, 
-  UserNotFoundError 
+import {
+  AuthError,
+  MissingTokenError,
+  InvalidTokenError,
+  UserNotFoundError,
 } from '../errors';
 
 /**
@@ -15,7 +15,7 @@ import {
  * @returns Middleware function compatible with Express/Koa/Fastify
  */
 export function requireAuth(
-  getUserById: GetUserById, 
+  getUserById: GetUserById,
   secret: string
 ): MiddlewareFunction {
   // TODO: Implement authentication middleware logic
@@ -29,7 +29,7 @@ export function requireAuth(
  * @returns Middleware function that adds user to request if token is valid
  */
 export function optionalAuth(
-  getUserById: GetUserById, 
+  getUserById: GetUserById,
   secret: string
 ): MiddlewareFunction {
   // TODO: Implement optional authentication middleware logic
@@ -44,11 +44,10 @@ export function optionalAuth(
  * @returns Middleware function that checks user role
  */
 export function requireRole(
-  getUserById: GetUserById, 
-  secret: string, 
+  getUserById: GetUserById,
+  secret: string,
   allowedRoles: string[]
 ): MiddlewareFunction {
   // TODO: Implement role-based authentication middleware logic
   throw new Error('requireRole not implemented');
 }
-

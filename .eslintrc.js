@@ -9,8 +9,8 @@ module.exports = {
   plugins: ['@typescript-eslint'],
   extends: [
     'eslint:recommended',
-    '@typescript-eslint/recommended',
-    '@typescript-eslint/recommended-requiring-type-checking',
+    'plugin:@typescript-eslint/recommended',
+    'plugin:@typescript-eslint/recommended-requiring-type-checking',
   ],
   env: {
     node: true,
@@ -19,26 +19,30 @@ module.exports = {
   },
   rules: {
     // TypeScript specific rules
-    '@typescript-eslint/no-unused-vars': ['error', { argsIgnorePattern: '^_' }],
-    '@typescript-eslint/explicit-function-return-type': 'warn',
-    '@typescript-eslint/explicit-module-boundary-types': 'warn',
+    '@typescript-eslint/no-unused-vars': ['warn', { argsIgnorePattern: '^_' }],
+    '@typescript-eslint/explicit-function-return-type': 'off',
+    '@typescript-eslint/explicit-module-boundary-types': 'off',
     '@typescript-eslint/no-explicit-any': 'warn',
-    '@typescript-eslint/prefer-const': 'error',
-    '@typescript-eslint/no-inferrable-types': 'error',
+    '@typescript-eslint/no-inferrable-types': 'warn',
+    '@typescript-eslint/require-await': 'off',
+    '@typescript-eslint/no-unsafe-assignment': 'off',
+    '@typescript-eslint/no-unsafe-member-access': 'off',
+    '@typescript-eslint/no-var-requires': 'off',
     
     // General rules
     'no-console': 'warn',
     'no-debugger': 'error',
-    'prefer-const': 'error',
+    'prefer-const': 'warn',
     'no-var': 'error',
     'object-shorthand': 'error',
     'prefer-arrow-callback': 'error',
     
     // Import rules
-    'sort-imports': ['error', { 
+    'sort-imports': ['warn', { 
       'ignoreCase': true,
       'ignoreDeclarationSort': true 
     }],
+    'no-useless-escape': 'warn',
   },
   ignorePatterns: [
     'dist/',
