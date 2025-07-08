@@ -9,7 +9,7 @@ export function extractTokenFromHeader(
   authHeader: string | undefined
 ): string | null {
   // TODO: Implement token extraction logic
-  throw new Error('extractTokenFromHeader not implemented');
+  return null;
 }
 
 /**
@@ -21,7 +21,7 @@ export function extractBearerToken(
   authHeader: string | undefined
 ): string | null {
   // TODO: Implement bearer token extraction logic
-  throw new Error('extractBearerToken not implemented');
+  return null;
 }
 
 /**
@@ -31,7 +31,7 @@ export function extractBearerToken(
  */
 export function validateAuthHeader(authHeader: string | undefined): boolean {
   // TODO: Implement header validation logic
-  throw new Error('validateAuthHeader not implemented');
+  return false;
 }
 
 /**
@@ -45,7 +45,7 @@ export function extractTokenByScheme(
   scheme: string = 'Bearer'
 ): string | null {
   // TODO: Implement token extraction by scheme logic
-  throw new Error('extractTokenByScheme not implemented');
+  return null;
 }
 
 /**
@@ -59,5 +59,5 @@ export function extractTokenFromCookie(
   cookieName: string = 'token'
 ): string | null {
   // TODO: Implement cookie token extraction logic
-  throw new Error('extractTokenFromCookie not implemented');
+  return null;
 }

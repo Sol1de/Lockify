@@ -20,7 +20,7 @@ export function generateToken<T extends JwtPayload = JwtPayload>(
   options?: JwtOptions
 ): string {
   // TODO: Implement JWT token generation logic
-  throw new Error('generateToken not implemented');
+  return '';
 }
 
 /**
@@ -34,7 +34,7 @@ export function verifyToken<T extends JwtPayload = JwtPayload>(
   secret: string
 ): T | null {
   // TODO: Implement JWT token verification logic
-  throw new Error('verifyToken not implemented');
+  return null;
 }
 
 /**
@@ -46,7 +46,7 @@ export function decodeToken<T extends JwtPayload = JwtPayload>(
   token: string
 ): T | null {
   // TODO: Implement JWT token decoding logic
-  throw new Error('decodeToken not implemented');
+  return null;
 }
 
 /**
@@ -56,7 +56,7 @@ export function decodeToken<T extends JwtPayload = JwtPayload>(
  */
 export function isTokenExpired(token: string): boolean {
   // TODO: Implement token expiration check logic
-  throw new Error('isTokenExpired not implemented');
+  return false;
 }
 
 /**
@@ -66,7 +66,7 @@ export function isTokenExpired(token: string): boolean {
  */
 export function getTokenExpiration(token: string): Date | null {
   // TODO: Implement token expiration extraction logic
-  throw new Error('getTokenExpiration not implemented');
+  return null;
 }
 
 /**
@@ -82,5 +82,5 @@ export function refreshToken<T extends JwtPayload = JwtPayload>(
   options?: JwtOptions
 ): string {
   // TODO: Implement token refresh logic
-  throw new Error('refreshToken not implemented');
+  return '';
 }

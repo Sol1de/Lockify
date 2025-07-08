@@ -18,7 +18,7 @@ export async function hashPassword(
   options?: HashOptions
 ): Promise<string> {
   // TODO: Implement password hashing logic
-  throw new Error('hashPassword not implemented');
+  return '';
 }
 
 /**
@@ -32,7 +32,7 @@ export async function comparePassword(
   hash: string
 ): Promise<boolean> {
   // TODO: Implement password comparison logic
-  throw new Error('comparePassword not implemented');
+  return false;
 }
 
 /**
@@ -42,7 +42,7 @@ export async function comparePassword(
  */
 export function validatePassword(password: string): boolean {
   // TODO: Implement password validation logic
-  throw new Error('validatePassword not implemented');
+  return false;
 }
 
 /**
@@ -54,5 +54,5 @@ export async function generateSalt(
   rounds: number = DEFAULT_SALT_ROUNDS
 ): Promise<string> {
   // TODO: Implement salt generation logic
-  throw new Error('generateSalt not implemented');
+  return '';
 }
