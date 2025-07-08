@@ -136,23 +136,23 @@ export function loadEnvConfig(): EnvConfig {
   if (process.env.HMAC_SECRET) {
     config.hmacSecret = process.env.HMAC_SECRET;
   }
-  
+
   if (process.env.ENCRYPTION_KEY) {
     config.encryptionKey = process.env.ENCRYPTION_KEY;
   }
-  
+
   if (process.env.COOKIE_SECRET) {
     config.cookieSecret = process.env.COOKIE_SECRET;
   }
-  
+
   if (process.env.SESSION_SECRET) {
     config.sessionSecret = process.env.SESSION_SECRET;
   }
-  
+
   if (process.env.DATABASE_URL) {
     config.databaseUrl = process.env.DATABASE_URL;
   }
-  
+
   if (process.env.REDIS_URL) {
     config.redisUrl = process.env.REDIS_URL;
   }
