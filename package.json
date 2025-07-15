@@ -32,15 +32,15 @@
     "nodejs",
     "typescript"
   ],
-  "author": "Your Name <your.email@example.com>",
+  "author": "Soldead: olivier.delmas@edu.devinci.fr",
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "https://github.com/yourusername/lockify.git"
+    "url": "https://github.com/Sol1de/Lockify/"
   },
-  "homepage": "https://github.com/yourusername/lockify#readme",
+  "homepage": "https://github.com/Sol1de/Lockify/#readme",
   "bugs": {
-    "url": "https://github.com/yourusername/lockify/issues"
+    "url": "https://github.com/Sol1de/Lockify/issues"
   },
   "files": [
     "dist",
